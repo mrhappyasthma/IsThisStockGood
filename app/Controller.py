@@ -20,7 +20,7 @@ class HomepageHandler(webapp2.RequestHandler) :
                 'current_year' : date.today().year,
             }
 
-            renderTemplate(self.response, 'base.html', template_values)
+            renderTemplate(self.response, 'home.html', template_values)
 
 
 # list of URI/Handler routing tuples
