@@ -1,7 +1,7 @@
 # IsThisStockGood
 
 This website attempts to automate much of the calculations described in Phil Town's
-[Rule #1 Investing](https://www.amazon.com/gp/product/0307336840?pf_rd_p=c2945051-950f-485c-b4df-15aac5223b10&pf_rd_r=WVNPVWRWTJ9E0QSDGWTH) book.
+[Rule #1](https://www.amazon.com/gp/product/0307336840?pf_rd_p=c2945051-950f-485c-b4df-15aac5223b10&pf_rd_r=WVNPVWRWTJ9E0QSDGWTH) investing book.
 
 To use the website, simply enter in a stock ticker symbol and let this site do its magic.
 
