@@ -17,6 +17,14 @@ class RuleOneInvestingCalculationsTest(unittest.TestCase):
     slope = RuleOne.slope_of_best_fit_line_for_data(data)
     self.assertEqual(slope, 2.26)
 
+  def test_max_position_size(self):
+    share_price = 50.25
+    trade_volume = 2134099
+    max_position,max_shares = RuleOne.max_position_size(share_price,
+                                                        trade_volume)
+    self.assertEqual(max_position, 1072335)
+    self.assertEqual(max_shares, 21340)
+
   def test_rule_one_margin_of_safety_price(self):
     pass
 

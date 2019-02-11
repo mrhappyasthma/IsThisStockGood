@@ -21,6 +21,25 @@ def slope_of_best_fit_line_for_data(data):
   return m
 
 
+def max_position_size(share_price, trade_volume):
+  """
+  Returns the limits for a position size for a given stock. These are the
+  value to limit your position below to make sure you can buy in or sell out of
+  a stock without caushing an artifical price change.
+
+  This boils down to 1% of the volume or 1% of the price of the volume.
+
+  Args:
+    share_price: The share price of the stock.
+    trade_volume: The average trade volume of the stock.
+  """
+  if not share_price or not trade_volume:
+    return None
+  max_shares = math.floor(trade_volume * 0.01)  # 1%
+  max_position = math.floor(share_price * max_shares)
+  return max_position,max_shares
+
+
 def rule_one_margin_of_safety_price(current_eps, estimated_growth_rate,
                                     historical_low_pe, historical_high_pe):
   """
