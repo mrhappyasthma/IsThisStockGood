@@ -2,6 +2,23 @@
 
 
 import math
+import numpy as np
+
+
+def slope_of_best_fit_line_for_data(data):
+  """
+  Returns the slope of the line of best fit for a set of data points.
+
+  Args:
+    data: A list of data points to plot a best-fit line on.
+
+  Returns:
+    Returns the slope of the best fit line.
+  """
+  if not data or len(data) < 2:
+    return None
+  m,b = np.polyfit(range(0, len(data)), data, 1)
+  return m
 
 
 def rule_one_margin_of_safety_price(current_eps, estimated_growth_rate,
@@ -54,6 +71,8 @@ def calculate_future_eps(current_esp, estimated_growth_rate, time_horizon=10):
   """
   # FV = C * (1 + r)^n
   # where C -> current_value, r -> rate, n -> years
+  if not current_eps or not estimated_growth_rate:
+    return None
   ten_year_growth_rate = math.pow(1.0 + estimated_growth_rate, time_horizon)
   future_eps_value = current_eps * ten_year_growth_rate
   return future_eps_value
@@ -78,6 +97,9 @@ def calculate_future_pe(estimated_growth_rate, historical_low_pe,
   """
   # To be conservative, we will take the smaller of these two: 1. the average
   # historical PE, 2. double the estimated growth rate.
+  if not estimated_growth_rate or not historical_low_pe \
+     or not historical_high_pe:
+    return None
   future_pe_one = (historical_low_pe + historical_high_pe) / 2.0
   future_pe_two = 2.0 * estimated_growth_rate
   conservative_future_pe = min(future_pe_one, future_pe_two)
@@ -96,6 +118,8 @@ def calculate_estimated_future_price(future_eps, future_pe):
   Returns:
     The estimated future price of a stock.
   """
+  if not future_eps or not future_pe:
+    return None
   return future_eps * future_pe
 
 
@@ -118,6 +142,8 @@ def calculate_sticker_price(future_price, time_horizon=10,
   """
   # PV = FV / (1 + r)^n
   # where r -> rate and n -> years
+  if not future_price:
+    return None
   target_growth_rate = math.pow(1.0 + rate_of_return, time_horizon)
   sticker_price = future_price / target_growth_rate
   return sticker_price
@@ -135,4 +161,6 @@ def calculate_margin_of_safety(sticker_price, margin_of_safety=0.5):
   Returns:
     The margin of safety price.
   """
+  if not sticker_price:
+    return None
   return sticker_price * (1 - margin_of_safety)

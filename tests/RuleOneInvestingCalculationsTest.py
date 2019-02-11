@@ -12,6 +12,11 @@ import RuleOneInvestingCalculations as RuleOne
 
 class RuleOneInvestingCalculationsTest(unittest.TestCase):
 
+  def test_slope_of_best_fit_line_for_data(self):
+    data = [1.3, 2.5, 3.5, 8.5]
+    slope = RuleOne.slope_of_best_fit_line_for_data(data)
+    self.assertEqual(slope, 2.26)
+
   def test_rule_one_margin_of_safety_price(self):
     pass
 
