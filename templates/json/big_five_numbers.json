@@ -1,0 +1,7 @@
+{
+  "roic" : {{ roic }},
+  "eps": {{ eps }},
+  "sales": {{ sales }},
+  "equity": {{ equity }},
+  "cash": {{ cash }}
+}

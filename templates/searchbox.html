@@ -1,18 +1,21 @@
 <div id="searchbox">
   <center>
-    <form action = "/search" method = "get">
-      <input type="text" name="Ticker Symbol" placeholder="Ticker Symbol"
+    <form id="searchboxform" action="/search" method="post">
+      <input type="text" id="ticker" placeholder="Ticker Symbol"
              maxlength=5 onkeydown="return validateInput(event)"/>
       <input type="submit" value="Analyze" />
     </form>
-  <center>
-
-  <script>
-    // Returns `true` if the key is an alphabetic keystroke or the backspace
-    // key.
-    function validateInput(event) {
-      var key = event.keyCode;
-      return ((key >= 65 && key <= 90) || key == 8);
-    };
-  </script>
+  </center>
 </div>
+
+<script>
+  // Returns `true` if the key is an alphabetic keystroke or the backspace
+  // key.
+  function validateInput(event) {
+    var key = event.keyCode;
+    return ((key >= 65 && key <= 90) || key == 8);
+  };
+</script>
+<script>
+  {% include "js/search.js" %}
+</script>

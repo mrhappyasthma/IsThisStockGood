@@ -1,5 +1,6 @@
 import os
 import webapp2
+from Morningstar import MorningstarRatios
 from google.appengine.ext.webapp import template
 from datetime import date
 
@@ -22,11 +23,33 @@ class HomepageHandler(webapp2.RequestHandler) :
 
             renderTemplate(self.response, 'home.html', template_values)
 
+class SearchHandler(webapp2.RequestHandler) :
+    def post(self):
+        if os.environ['HTTP_HOST'].endswith('.appspot.com'):  #Redirect the appspot url to the custom url
+            self.response.out.write('<meta http-equiv="refresh" content="0; url=http://isthisstockgood.com" />')
+        else:
+            ticker_symbol = self.request.get('ticker')
+            if not ticker_symbol:
+              return
+            m = MorningstarRatios.download_ratios(ticker_symbol)
+            if not m:
+              renderTemplate(self.response, 'json/error.json', { 'error': 'Invalid ticker symbol' })
+              return
+            template_values = {
+                'roic': m.roic,
+                'eps': m.eps_averages,
+                'sales': m.sales_averages,
+                'equity': m.equity,
+                'cash': m.free_cash_flow,
+            }
+            renderTemplate(self.response, 'json/big_five_numbers.json', template_values)
+
 
 # list of URI/Handler routing tuples
 # the URI is a regular expression beginning with root '/' char
 routeHandlers = [
     (r'/', HomepageHandler),
+    (r'/search', SearchHandler)
 ]
 
 # application object
