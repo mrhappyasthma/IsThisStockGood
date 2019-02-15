@@ -96,7 +96,6 @@ class MorningstarRatios:
       return None
     # Grab the second-to-last element for each list since we want to skip the
     # last quarter value.
-    parser = HTMLParser.HTMLParser()
     year_over_year = float(self.raw_data[index][-2])
     average_3 = float(self.raw_data[index+1][-2])
     average_5 = float(self.raw_data[index+2][-2])
