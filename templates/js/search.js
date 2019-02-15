@@ -20,6 +20,10 @@ $(document).ready(function() {
     // Update the HTML with the results.
     posting.done(function(json_data) {
       data = JSON.parse(json_data);
+      if (data['error']) {
+        alert(data['error']);
+        return;
+      }
       updateHtmlWithDataForKey(data, 'eps');
       updateHtmlWithDataForKey(data, 'sales');
     });
