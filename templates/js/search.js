@@ -24,13 +24,27 @@ $(document).ready(function() {
         alert(data['error']);
         return;
       }
-      updateHtmlWithDataForKey(data, 'eps');
-      updateHtmlWithDataForKey(data, 'sales');
+      updateHtmlWithValueForKey(data, 'long_term_debt', true)
+      updateHtmlWithValueForKey(data, 'free_cash_flow', true)
+      updateHtmlWithValueForKey(data, 'debt_payoff_time', false)
+      colorCellWithIDForRange('#debt_payoff_time', [5, 4, 0])
+      updateBigFiveHtmlWithDataForKey(data, 'eps');
+      updateBigFiveHtmlWithDataForKey(data, 'sales');
     });
   });
 });
 
-function updateHtmlWithDataForKey(data, key) {
+function updateHtmlWithValueForKey(data, key, commas) {
+  value = data[key];
+  if (commas) {
+    value = value.toLocaleString('en', {useGrouping:true});
+  } else {
+    value = value.toFixed(2);
+  }
+  $('#' + key).html(value);
+}
+
+function updateBigFiveHtmlWithDataForKey(data, key) {
   var row_data = data[key];
   var suffixes = ['_1_val', '_3_val', '_5_val', '_max_val'];
   for (var i = 0; i < row_data.length; i++) {
@@ -38,14 +52,22 @@ function updateHtmlWithDataForKey(data, key) {
     var value = row_data[i]
     $(element_id).html(value);
 
-    var backgroundColor = '#EE6767';
-    if (value >= 10) {
-      backgroundColor = '#00AF41';
-    } else if (value >= 5) {
-      backgroundColor = 'FFFF66';
-    } else if (value >= 0) {
-      backgroundColor = 'FF9933';
-    }
-    $(element_id).css('background-color', backgroundColor);
+    colorCellWithIDForRange(element_id, [0, 5, 10])
   }
+}
+
+function colorCellWithIDForRange(id, range) {
+    if (range.length != 3) {
+      return;
+    }
+    value = $(id).html();
+    var backgroundColor = '#EE6767';  // Red
+    if (value >= range[2]) {
+      backgroundColor = '#00AF41';  // Green
+    } else if (value >= range[1]) {
+      backgroundColor = 'FFFF66';  // Yellow
+    } else if (value >= range[0]) {
+      backgroundColor = 'FF9933';  // Orange
+    }
+    $(id).css('background-color', backgroundColor);
 }

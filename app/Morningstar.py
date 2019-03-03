@@ -41,6 +41,9 @@ class MorningstarRatios:
     self.free_cash_flow = []  # Free Cash Flow
     self.sales_averages = []  # Revenue
     self.eps_averages = []  # Earnings per share
+    self.long_term_debt = 0
+    self.recent_free_cash_flow = 0
+    self.debt_payoff_time = 0
 
   def fetch(self):
     """Fetches the URL and populates the ratios correctly."""
@@ -60,6 +63,12 @@ class MorningstarRatios:
       self.free_cash_flow = self.extract_float_data_for_key('Free Cash Flow USD Mil')
       if not self.free_cash_flow:
         return False
+      self.recent_free_cash_flow = self.free_cash_flow[-1] * 1000000
+      self.long_term_debt = self.extract_float_data_for_key('Long-Term Debt')
+      if not self.long_term_debt:
+        return False
+      self.long_term_debt = self.long_term_debt[-1] * 1000000
+      self.debt_payoff_time = self.long_term_debt / self.recent_free_cash_flow
       self.sales_averages = self.extract_averages_from_data_for_key('Revenue %')
       if not self.sales_averages:
         return False

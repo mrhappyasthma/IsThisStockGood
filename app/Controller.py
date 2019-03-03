@@ -31,6 +31,7 @@ class SearchHandler(webapp2.RequestHandler) :
             ticker_symbol = self.request.get('ticker')
             if not ticker_symbol:
               return
+
             m = MorningstarRatios.download_ratios(ticker_symbol)
             if not m:
               renderTemplate(self.response, 'json/error.json', { 'error': 'Invalid ticker symbol' })
@@ -41,6 +42,9 @@ class SearchHandler(webapp2.RequestHandler) :
                 'sales': m.sales_averages,
                 'equity': m.equity,
                 'cash': m.free_cash_flow,
+                'long_term_debt' : m.long_term_debt,
+                'free_cash_flow' : m.recent_free_cash_flow,
+                'debt_payoff_time' : m.debt_payoff_time
             }
             renderTemplate(self.response, 'json/big_five_numbers.json', template_values)
 
