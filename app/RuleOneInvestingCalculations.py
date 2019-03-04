@@ -2,7 +2,7 @@
 
 
 import math
-import numpy as np
+#import numpy as np
 
 
 def compound_annual_growth_rate(start_balance, end_balance, years):
@@ -17,7 +17,7 @@ def compound_annual_growth_rate(start_balance, end_balance, years):
     return None
   exponent = 1.0 / years
   difference = end_balance / start_balance
-  return round(pow(difference, exponent) - 1.0) * 100 , 2)
+  return round((pow(difference, exponent) - 1.0) * 100 , 2)
 
 
 def slope_of_best_fit_line_for_data(data):
@@ -32,7 +32,7 @@ def slope_of_best_fit_line_for_data(data):
   """
   if not data or len(data) < 2:
     return None
-  m,b = np.polyfit(range(0, len(data)), data, 1)
+#  m,b = np.polyfit(range(0, len(data)), data, 1)
   return m
 
 
