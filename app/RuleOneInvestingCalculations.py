@@ -5,6 +5,21 @@ import math
 import numpy as np
 
 
+def compound_annual_growth_rate(start_balance, end_balance, years):
+  """
+  Returns the compound annual growth rate from raw data.
+
+  Formula = (end/start)^(1/years) - 1
+  """
+  if start_balance == None or end_balance == None or years == None:
+    return
+  if start_balance == 0 or years == 0:
+    return
+  exponent = 1.0 / years
+  difference = end_balance / start_balance
+  return round(pow(difference, exponent) - 1.0 , 2)
+
+
 def slope_of_best_fit_line_for_data(data):
   """
   Returns the slope of the line of best fit for a set of data points.
