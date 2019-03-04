@@ -2,7 +2,7 @@
 
 
 import math
-#import numpy as np
+import numpy as np
 
 
 def compound_annual_growth_rate(start_balance, end_balance, years):
@@ -32,7 +32,7 @@ def slope_of_best_fit_line_for_data(data):
   """
   if not data or len(data) < 2:
     return None
-#  m,b = np.polyfit(range(0, len(data)), data, 1)
+  m,b = np.polyfit(range(0, len(data)), data, 1)
   return m
 
 
