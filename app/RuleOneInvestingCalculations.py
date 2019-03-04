@@ -17,7 +17,13 @@ def compound_annual_growth_rate(start_balance, end_balance, years):
     return None
   exponent = 1.0 / years
   difference = end_balance / start_balance
-  return round((pow(difference, exponent) - 1.0) * 100 , 2)
+  negative = (difference < 0)
+  if negative:
+    difference = difference * -1
+  result = round((pow(difference, exponent) - 1.0) * 100 , 2)
+  if negative:
+    result = result * -1
+  return result
 
 
 def slope_of_best_fit_line_for_data(data):
