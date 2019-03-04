@@ -1,1 +1,10 @@
-TODO
+Always make sure to buy with a large margin of safety (recommended = 50%). This
+means that once you calculate a fair value for the stock today (i.e. sticker
+price), buy it for half of that. This helps protect against any unknown
+information or mistakes in the calculations. So first calculate the estimated
+sticker price to buy the stock at a fair value, which is done as a conservative
+calculation based on a few key factors such as historical growth, projected
+future growth, and earnings-per-share. Then take this fair value and divide
+it in half to get the price to buy at with a 50% margin of safety. For more
+information, read the following chapters from Rule #1 Investing: chapter 8
+"Demand a Margin of Safety" and chapter 9 "Calculate the Sticker Price".
