@@ -65,32 +65,26 @@ class MorningstarRatios:
       self.roic_averages = self.compute_growth_rates_for_data(self.roic)
       if not self.roic_averages:
         logging.error('Failed to parse ROIC')
-        return False
       self.equity = self.extract_float_data_for_key('Book Value Per Share * USD')
       self.equity_averages = self.compute_growth_rates_for_data(self.equity)
       if not self.equity:
         logging.error('Failed to parse BVPS.')
-        return False
       self.free_cash_flow = self.extract_float_data_for_key('Free Cash Flow USD Mil')
       self.free_cash_flow_averages = self.compute_growth_rates_for_data(self.free_cash_flow)
       if not self.free_cash_flow:
         logging.error('Failed to parse Free Cash Flow.')
-        return False
       self.recent_free_cash_flow = self.free_cash_flow[-1] * 1000000
       self.long_term_debt = self.extract_float_data_for_key('Long-Term Debt')
       if not self.long_term_debt:
         logging.error('Failed to parse Long Term Debt')
-        return False
       self.long_term_debt = self.long_term_debt[-1] * 1000000
       self.debt_payoff_time = self.long_term_debt / self.recent_free_cash_flow
       self.sales_averages = self.extract_averages_from_data_for_key('Revenue %')
       if not self.sales_averages:
         logging.error('Failed to parse Sales Averages')
-        return False
       self.eps_averages = self.extract_averages_from_data_for_key('EPS %')
       if not self.eps_averages:
         logging.error('Failed to parse EPS averages.')
-        return False
     except Exception as e:
       logging.error(e)
       return False
