@@ -115,11 +115,11 @@ class MorningstarRatios:
       return None
     # Grab the second-to-last element for each list since we want to skip the
     # last quarter value.
-    year_over_year = float(self.raw_data[index][-2])
-    average_3 = float(self.raw_data[index+1][-2])
-    average_5 = float(self.raw_data[index+2][-2])
-    average_10 = float(self.raw_data[index+3][-2])
-    return [year_over_year, average_3, average_5, average_10]
+    year_over_year = float(self.raw_data[index][-2]) if self.raw_data[index][-2] else None
+    average_3 = float(self.raw_data[index+1][-2]) if self.raw_data[index+1][-2] else None
+    average_5 = float(self.raw_data[index+2][-2]) if self.raw_data[index+2][-2] else None
+    average_10 = float(self.raw_data[index+3][-2]) if self.raw_data[index+3][-2] else None
+    return [x for x in [year_over_year, average_3, average_5, average_10] if x is not None]
 
   def extract_float_data_for_key(self, key):
     """Extracts a specific row of data given a key into self.raw_data.
