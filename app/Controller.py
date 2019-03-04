@@ -37,11 +37,11 @@ class SearchHandler(webapp2.RequestHandler) :
               renderTemplate(self.response, 'json/error.json', { 'error': 'Invalid ticker symbol' })
               return
             template_values = {
-                'roic': m.roic,
+                'roic': m.roic_averages,
                 'eps': m.eps_averages,
                 'sales': m.sales_averages,
-                'equity': m.equity,
-                'cash': m.free_cash_flow,
+                'equity': m.equity_averages,
+                'cash': m.free_cash_flow_averages,
                 'long_term_debt' : m.long_term_debt,
                 'free_cash_flow' : m.recent_free_cash_flow,
                 'debt_payoff_time' : m.debt_payoff_time

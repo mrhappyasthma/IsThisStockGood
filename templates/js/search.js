@@ -30,6 +30,9 @@ $(document).ready(function() {
       colorCellWithIDForRange('#debt_payoff_time', [5, 4, 0])
       updateBigFiveHtmlWithDataForKey(data, 'eps');
       updateBigFiveHtmlWithDataForKey(data, 'sales');
+      updateBigFiveHtmlWithDataForKey(data, 'equity');
+      updateBigFiveHtmlWithDataForKey(data, 'roic');
+      updateBigFiveHtmlWithDataForKey(data, 'cash');
     });
   });
 });

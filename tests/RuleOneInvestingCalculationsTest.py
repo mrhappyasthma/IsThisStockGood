@@ -14,7 +14,7 @@ class RuleOneInvestingCalculationsTest(unittest.TestCase):
 
   def test_compound_annual_growth_rate(self):
     growth_rate = RuleOne.compound_annual_growth_rate(2805000, 108957000, 8)
-    self.assertEqual(growth_rate, 0.58)
+    self.assertEqual(growth_rate, 57.57)
 
   def test_slope_of_best_fit_line_for_data(self):
     data = [1.3, 2.5, 3.5, 8.5]

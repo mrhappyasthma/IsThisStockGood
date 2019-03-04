@@ -5,6 +5,7 @@ python data structures
 
 import csv
 import logging
+import RuleOneInvestingCalculations as RuleOne
 import urllib2
 
 
@@ -38,8 +39,11 @@ class MorningstarRatios:
     self.url = self.MORNINGSTAR_RATIOS_URL + ticker_symbol
     self.raw_data = []
     self.roic = []  # Return on invested capital
+    self.roic_averages = []
     self.equity = []  # Equity or BVPS (book value per share)
+    self.equity_averages = []
     self.free_cash_flow = []  # Free Cash Flow
+    self.free_cash_flow_averages = []
     self.sales_averages = []  # Revenue
     self.eps_averages = []  # Earnings per share
     self.long_term_debt = 0
@@ -58,14 +62,17 @@ class MorningstarRatios:
         logging.error('No Morningstar data')
         return False
       self.roic = self.extract_float_data_for_key('Return on Invested Capital %')
-      if not self.roic:
+      self.roic_averages = self.compute_growth_rates_for_data(self.roic)
+      if not self.roic_averages:
         logging.error('Failed to parse ROIC')
         return False
       self.equity = self.extract_float_data_for_key('Book Value Per Share * USD')
+      self.equity_averages = self.compute_growth_rates_for_data(self.equity)
       if not self.equity:
         logging.error('Failed to parse BVPS.')
         return False
       self.free_cash_flow = self.extract_float_data_for_key('Free Cash Flow USD Mil')
+      self.free_cash_flow_averages = self.compute_growth_rates_for_data(self.free_cash_flow)
       if not self.free_cash_flow:
         logging.error('Failed to parse Free Cash Flow.')
         return False
@@ -136,3 +143,21 @@ class MorningstarRatios:
         # which is the TTM (trailing twelve month) and is often duplicated.
         return [float(x.replace(',', '')) for x in filter(None, row[1:-1])]
     return None
+
+  def compute_growth_rates_for_data(self, data):
+    if data is None or len(data) < 2:
+      return None
+    results = []
+    year_over_year = RuleOne.compound_annual_growth_rate(data[-2], data[-1], 1)
+    results.append(year_over_year)
+    if len(data) > 3:
+      average_3 = RuleOne.compound_annual_growth_rate(data[-4], data[-1], 3)
+      results.append(average_3)
+    if len(data) > 5:
+      average_5 = RuleOne.compound_annual_growth_rate(data[-6], data[-1], 5)
+      results.append(average_3)
+    if len(data) > 6:
+      last_index = len(data) - 1
+      max = RuleOne.compound_annual_growth_rate(data[0], data[-1], last_index)
+      results.append(max)
+    return [x for x in results if x is not None]
