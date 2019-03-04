@@ -4,6 +4,7 @@ python data structures
 
 
 import csv
+import logging
 import urllib2
 
 
@@ -48,34 +49,43 @@ class MorningstarRatios:
   def fetch(self):
     """Fetches the URL and populates the ratios correctly."""
     try:
+      logging.info(self.url)
       response = urllib2.urlopen(self.url)
       csv_reader = csv.reader(response)
       for row in csv_reader:
         self.raw_data.append(row)
       if not len(self.raw_data):
+        logging.error('No Morningstar data')
         return False
       self.roic = self.extract_float_data_for_key('Return on Invested Capital %')
       if not self.roic:
+        logging.error('Failed to parse ROIC')
         return False
       self.equity = self.extract_float_data_for_key('Book Value Per Share * USD')
       if not self.equity:
+        logging.error('Failed to parse BVPS.')
         return False
       self.free_cash_flow = self.extract_float_data_for_key('Free Cash Flow USD Mil')
       if not self.free_cash_flow:
+        logging.error('Failed to parse Free Cash Flow.')
         return False
       self.recent_free_cash_flow = self.free_cash_flow[-1] * 1000000
       self.long_term_debt = self.extract_float_data_for_key('Long-Term Debt')
       if not self.long_term_debt:
+        logging.error('Failed to parse Long Term Debt')
         return False
       self.long_term_debt = self.long_term_debt[-1] * 1000000
       self.debt_payoff_time = self.long_term_debt / self.recent_free_cash_flow
       self.sales_averages = self.extract_averages_from_data_for_key('Revenue %')
       if not self.sales_averages:
+        logging.error('Failed to parse Sales Averages')
         return False
       self.eps_averages = self.extract_averages_from_data_for_key('EPS %')
       if not self.eps_averages:
+        logging.error('Failed to parse EPS averages.')
         return False
-    except:
+    except Exception as e:
+      logging.error(e)
       return False
     return True
 
