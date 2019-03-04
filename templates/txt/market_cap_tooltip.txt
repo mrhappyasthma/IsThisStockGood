@@ -1,1 +1,7 @@
-TODO
+A paraphrased excerpt from chapter 15 in Rule #1 Investing titled "Prepare for
+Your First Rule #1 Purchase": A good rule of thumb is to find a business that
+trades more than 500,000 shares a day. (If the share price is < $1, make it
+1,000,000 shares per day.) Additionally make sure that you own less than 1% of
+the total dollar amount of trades in a given day. -- These two rules will help
+ensure that you can get in/out of the stock without affecting the price and
+can do so at a moment's notice.
