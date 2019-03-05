@@ -50,12 +50,19 @@ function updateHtmlWithValueForKey(data, key, commas) {
 function updateBigFiveHtmlWithDataForKey(data, key) {
   var row_data = data[key];
   var suffixes = ['_1_val', '_3_val', '_5_val', '_max_val'];
-  for (var i = 0; i < row_data.length; i++) {
+  for (var i = 0; i < suffixes.length; i++) {
     var element_id = '#' + key + suffixes[i];
-    var value = row_data[i]
+    var value = '-';
+    if (i < row_data.length) {
+      value = row_data[i];
+    }
     $(element_id).html(value);
 
-    colorCellWithIDForRange(element_id, [0, 5, 10])
+    if (value == '-') {
+      $(element_id).css('background-color', '#FFFFFF');
+    } else {
+      colorCellWithIDForRange(element_id, [0, 5, 10]);
+    }
   }
 }
 
@@ -68,9 +75,9 @@ function colorCellWithIDForRange(id, range) {
     if (value >= range[2]) {
       backgroundColor = '#00AF41';  // Green
     } else if (value >= range[1]) {
-      backgroundColor = 'FFFF66';  // Yellow
+      backgroundColor = '#FFFF66';  // Yellow
     } else if (value >= range[0]) {
-      backgroundColor = 'FF9933';  // Orange
+      backgroundColor = '#FF9933';  // Orange
     }
     $(id).css('background-color', backgroundColor);
 }
