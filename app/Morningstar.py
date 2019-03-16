@@ -33,12 +33,6 @@ class MorningstarReport:
     url = MorningstarReport.BASE_URL.format(ticker_symbol, type, period, order, unit)
     return url
 
-  @classmethod
-  def download_report(cls, ticker_symbol, type, period):
-    report = cls(ticker_symbol, type, period)
-    success = report.fetch_report()
-    return report if success else None
-
   def __init__(self, ticker_symbol, type, period):
     self.ticker_symbol = ticker_symbol
     self.type = type
@@ -48,42 +42,30 @@ class MorningstarReport:
     self.ttm_net_income = -1
     self.url = MorningstarReport.construct_url(ticker_symbol, type, period)
 
-  def fetch_report(self):
+  def parse_report(self, data):
     try:
-      logging.info(self.url)
-      response = urllib2.urlopen(self.url)
-      csv_reader = csv.reader(response)
+      csv_reader = csv.reader(data)
       for row in csv_reader:
         self.raw_data.append(row)
-      self.net_income = extract_float_data_for_key(self.raw_data, 'Net income', True)
-      if not self.net_income:
-        logging.error('Cannot parse net_income.')
-      else:
-        self.ttm_net_income = self.net_income[-1]
     except Exception as e:
       logging.error(traceback.format_exc())
       return False
+
+    if self.type == MorningstarReport.TYPE_INCOME_STATEMENT:
+      self.parse_income_statement()
     return True
+
+  def parse_income_statement(self):
+    self.net_income = extract_float_data_for_key(self.raw_data, 'Net income', True)
+    if not self.net_income:
+      logging.error('Cannot parse net_income.')
+    else:
+      self.ttm_net_income = self.net_income[-1]
 
 class MorningstarRatios:
   """An object holding """
 
   MORNINGSTAR_RATIOS_URL = 'http://financials.morningstar.com/ajax/exportKR2CSV.html?t='
-
-  @classmethod
-  def download_ratios(cls, ticker_symbol):
-    """Initializes the ratio with a given ticker symbol and fetches the data.
-
-    Args:
-      ticker_symbol: A string representing the ticker symbol.
-
-    Returns:
-      Returns a fully initialized MorningstarRatios object, or None if the URL
-      fetch failed.
-    """
-    ratios = cls(ticker_symbol)
-    success = ratios.fetch_ratios()
-    return ratios if success else None
 
   def __init__(self, ticker_symbol):
     """Initializes the ratio with a given ticker symbol.
@@ -92,7 +74,7 @@ class MorningstarRatios:
       ticker_symbol: A string representing the ticker symbol.
     """
     self.ticker_symbol = ticker_symbol
-    self.ratios_url = self.MORNINGSTAR_RATIOS_URL + ticker_symbol
+    self.url = self.MORNINGSTAR_RATIOS_URL + ticker_symbol
     self.raw_data = []
     self.roic = []  # Return on invested capital
     self.roic_averages = []
@@ -106,12 +88,10 @@ class MorningstarRatios:
     self.recent_free_cash_flow = 0
     self.debt_payoff_time = 0
 
-  def fetch_ratios(self):
-    """Downloads the ratios URL and populates the ratios correctly."""
+  def parse_ratios(self, data):
+    """Parse the ratios data and calculates the ratios correctly."""
     try:
-      logging.info(self.ratios_url)
-      response = urllib2.urlopen(self.ratios_url)
-      csv_reader = csv.reader(response)
+      csv_reader = csv.reader(data)
       for row in csv_reader:
         self.raw_data.append(row)
       if not len(self.raw_data):
