@@ -1,6 +1,7 @@
 import os
 import webapp2
 from Morningstar import MorningstarRatios
+from Morningstar import MorningstarReport
 from google.appengine.ext.webapp import template
 from datetime import date
 
@@ -32,19 +33,26 @@ class SearchHandler(webapp2.RequestHandler) :
             if not ticker_symbol:
               return
 
-            m = MorningstarRatios.download_ratios(ticker_symbol)
-            if not m:
+            ratios = MorningstarRatios.download_ratios(ticker_symbol)
+            if not ratios:
+              renderTemplate(self.response, 'json/error.json', { 'error': 'Invalid ticker symbol' })
+              return
+            income_statement = \
+                MorningstarReport.download_report(ticker_symbol, \
+                                                  MorningstarReport.TYPE_INCOME_STATEMENT, \
+                                                  MorningstarReport.PERIOD_QUARTERLY)
+            if not income_statement:
               renderTemplate(self.response, 'json/error.json', { 'error': 'Invalid ticker symbol' })
               return
             template_values = {
-                'roic': m.roic_averages if m.roic_averages else [],
-                'eps': m.eps_averages if m.eps_averages else [],
-                'sales': m.sales_averages if m.sales_averages else [],
-                'equity': m.equity_averages if m.equity_averages else [],
-                'cash': m.free_cash_flow_averages,
-                'long_term_debt' : m.long_term_debt,
-                'free_cash_flow' : m.recent_free_cash_flow,
-                'debt_payoff_time' : m.debt_payoff_time
+                'roic': ratios.roic_averages if ratios.roic_averages else [],
+                'eps': ratios.eps_averages if ratios.eps_averages else [],
+                'sales': ratios.sales_averages if ratios.sales_averages else [],
+                'equity': ratios.equity_averages if ratios.equity_averages else [],
+                'cash': ratios.free_cash_flow_averages if ratios.free_cash_flow_averages else [],
+                'long_term_debt' : ratios.long_term_debt,
+                'free_cash_flow' : ratios.recent_free_cash_flow,
+                'debt_payoff_time' : ratios.debt_payoff_time,
             }
             renderTemplate(self.response, 'json/big_five_numbers.json', template_values)
 
