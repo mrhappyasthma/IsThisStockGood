@@ -1,3 +1,26 @@
+class Color {
+
+  static green() {
+    return '#00AF41';
+  }
+
+  static orange() {
+    return '#FF9933';
+  }
+
+  static red() {
+    return '#EE6767';
+  }
+
+  static white() {
+    return '#FFFFFF';
+  }
+
+  static yellow() {
+    return '#FFFF66';
+  }
+}
+
 // Attach a submit handler to the form.
 $(document).ready(function() {
   $("#searchboxform").submit(function(event) {
@@ -59,7 +82,8 @@ function updateBigFiveHtmlWithDataForKey(data, key) {
     $(element_id).html(value);
 
     if (value == '-') {
-      $(element_id).css('background-color', '#FFFFFF');
+      color = (i == 0) ? Color.red() :  Color.white()
+      $(element_id).css('background-color', color);
     } else {
       colorCellWithIDForRange(element_id, [0, 5, 10]);
     }
@@ -71,13 +95,13 @@ function colorCellWithIDForRange(id, range) {
       return;
     }
     value = $(id).html();
-    var backgroundColor = '#EE6767';  // Red
+    var backgroundColor = Color.red();
     if (value >= range[2]) {
-      backgroundColor = '#00AF41';  // Green
+      backgroundColor = Color.green();
     } else if (value >= range[1]) {
-      backgroundColor = '#FFFF66';  // Yellow
+      backgroundColor = Color.yellow();
     } else if (value >= range[0]) {
-      backgroundColor = '#FF9933';  // Orange
+      backgroundColor = Color.orange();
     }
     $(id).css('background-color', backgroundColor);
 }
