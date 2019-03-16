@@ -29,6 +29,16 @@ class RuleOneInvestingCalculationsTest(unittest.TestCase):
     self.assertEqual(max_position, 1072335)
     self.assertEqual(max_shares, 21340)
 
+  def test_payback_time(self):
+    years = RuleOne.payback_time(17680, 2115, 0.12)
+    self.assertEqual(years, 6)
+
+    invalid_years = RuleOne.payback_time(17680, 2115, -0.12)
+    self.assertEqual(invalid_years, -1)
+
+    invalid_years = RuleOne.payback_time(17680, -2115, 0.12)
+    self.assertEqual(invalid_years, -1)
+
   def test_rule_one_margin_of_safety_price(self):
     pass
 

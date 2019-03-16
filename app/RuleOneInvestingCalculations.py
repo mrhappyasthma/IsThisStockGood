@@ -61,6 +61,42 @@ def max_position_size(share_price, trade_volume):
   return max_position,max_shares
 
 
+def payback_time(market_cap, net_income, estimated_growth_rate):
+  """
+  Determine the amount of years to get your money back if you were to buy the
+  entire company at the current market cap given the TTM net income and
+  expected growth rate.
+
+  For more details, read PaybackTime by Phil Town for information on this
+  calculation. Basically its the summation of each years future value (FV
+  function on excel).
+
+  Args:
+   market_cap: The current market capitalization for the company.
+   net_income: The trailing twelve month (TTM) net income for the company.
+   estimated_growth_rate: A conservative estimated growth rate. (Typically the
+       minimum of a professional growth estimate and the historical growth rate
+       of equity/book-value-per-share.)
+
+  Returns:
+    Returns the number of years (rounded up) for how many years are needed to
+    receive a 100% return on your investment based on the company's income. If
+    any of the inputs are invalid, returns -1.
+  """
+  yearly_income = net_income
+  total_payback = 0
+  years = 0
+  while (total_payback < market_cap):
+    if yearly_income <= 0 or estimated_growth_rate <= 0:
+      years = -1
+      break;
+    yearly_income += (yearly_income * estimated_growth_rate)
+    total_payback += yearly_income
+    years += 1
+
+  return years
+
+
 def rule_one_margin_of_safety_price(current_eps, estimated_growth_rate,
                                     historical_low_pe, historical_high_pe):
   """
