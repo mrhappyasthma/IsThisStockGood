@@ -15,6 +15,10 @@ th, td {
   width: 70%;
 }
 
+a[href=""] {
+  display: none;
+}
+
 /** Tooltip source: https://www.webfx.com/blog/web-design/css-only-tooltips/ */
 .tooltip {
   border-bottom: 1px dotted #000000;

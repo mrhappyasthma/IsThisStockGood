@@ -47,6 +47,11 @@ $(document).ready(function() {
         alert(data['error']);
         return;
       }
+
+      // Update resources.
+      $('#morningstar_analysis_pdf').attr('href', 'http://quotes.morningstar.com/stockq/analysis-report?&t=' + $ticker)
+
+      // Update moat and management numbers.
       updateHtmlWithValueForKey(data, 'long_term_debt', true)
       updateHtmlWithValueForKey(data, 'free_cash_flow', true)
       updateHtmlWithValueForKey(data, 'debt_payoff_time', false)
