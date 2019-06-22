@@ -9,6 +9,36 @@ from google.appengine.api import urlfetch
 from google.appengine.ext.webapp import template
 from datetime import date
 
+def jsonpToCSV(s):
+  arr = []
+  ignore = False
+  printing = False
+  s = s.replace(',', '')
+  s = s.replace('\/', '/')
+  s = s.replace('&amp', '&')
+  s = s.replace('&nbsp;', ' ')
+  s = s.replace('</tr>', '\n')
+  for c in s:
+    if c == '<':
+      ignore = True
+      printing = False
+      continue
+    elif c == '>':
+      ignore = False
+      printing = False
+      continue
+    elif not ignore:
+      if not printing:
+        printing = True
+        arr.append(',')
+      arr.append(c)
+  output = ''.join(arr)
+  output = output.replace('\n,', '\n')
+  output = output.replace(',\n', '\n')
+  output = output.replace(' ,', ' ')
+  output = output.replace('&mdash;', '')
+  return output[1:] if output[0] == ',' else output
+
 def renderTemplate(response, templatename, templatevalues) :
     basepath = os.path.split(os.path.dirname(__file__)) #extract the base path, since we are in the "app" folder instead of the root folder
     path = os.path.join(basepath[0], 'templates/' + templatename)
@@ -53,6 +83,8 @@ class SearchHandler(webapp2.RequestHandler) :
             for rpc in self.rpcs:
               rpc.wait()
             ratios = self.ratios
+            if ratios:
+              ratios.calculate_long_term_debt()
             income = self.income_statement
             if not ratios or not income:
               renderTemplate(self.response, 'json/error.json', { 'error': 'Invalid ticker symbol' })
@@ -88,15 +120,33 @@ class SearchHandler(webapp2.RequestHandler) :
 
     def fetch_morningstar_ratios(self):
       self.ratios = MorningstarRatios(self.ticker_symbol)
-      logging.info(self.ratios.url)
-      rpc = urlfetch.create_rpc()
-      self.rpcs.append(rpc)
-      rpc.callback = functools.partial(self.parse_morningstar_ratios, rpc)
-      urlfetch.make_fetch_call(rpc, self.ratios.url)
+      logging.info(self.ratios.key_stat_url)
+      key_stat_rpc = urlfetch.create_rpc()
+      self.rpcs.append(key_stat_rpc)
+      key_stat_rpc.callback = functools.partial(self.parse_morningstar_ratios, key_stat_rpc)
+      urlfetch.make_fetch_call(key_stat_rpc, self.ratios.key_stat_url)
+
+      finance_rpc = urlfetch.create_rpc()
+      self.rpcs.append(finance_rpc)
+      finance_rpc.callback = functools.partial(self.parse_morningstar_finances, finance_rpc)
+      logging.info(self.ratios.finance_url)
+      urlfetch.make_fetch_call(finance_rpc, self.ratios.finance_url)
+
+    def parse_morningstar_finances(self, rpc):
+      if not self.ratios:
+        return
+      result = rpc.get_result()
+      parsed_content = jsonpToCSV(result.content)
+      success = self.ratios.parse_finances(parsed_content.split('\n'))
+      if not success:
+        self.ratios = None
 
     def parse_morningstar_ratios(self, rpc):
+      if not self.ratios:
+        return
       result = rpc.get_result()
-      success = self.ratios.parse_ratios(result.content.split('\n'))
+      parsed_content = jsonpToCSV(result.content)
+      success = self.ratios.parse_ratios(parsed_content.split('\n'))
       if not success:
         self.ratios = None
 
