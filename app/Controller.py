@@ -5,6 +5,7 @@ import re
 import webapp2
 from Morningstar import MorningstarRatios
 from Morningstar import MorningstarReport
+from MSNMoney import MSNMoney
 from google.appengine.api import urlfetch
 from google.appengine.ext.webapp import template
 from datetime import date
@@ -64,6 +65,7 @@ class SearchHandler(webapp2.RequestHandler) :
       self.rpcs = []
       self.ticker_symbol = ''
       self.ratios = None
+      self.pe_ratios = None
       self.income_statement = None
       self.error = False
 
@@ -80,12 +82,14 @@ class SearchHandler(webapp2.RequestHandler) :
 
             self.fetch_morningstar_ratios()
             self.fetch_income_statement()
+            self.fetch_pe_ratios()
             for rpc in self.rpcs:
               rpc.wait()
             ratios = self.ratios
             if ratios:
               ratios.calculate_long_term_debt()
             income = self.income_statement
+            pe_ratios = self.pe_ratios
             if not ratios or not income:
               renderTemplate(self.response, 'json/error.json', { 'error': 'Invalid ticker symbol' })
               return
@@ -98,6 +102,8 @@ class SearchHandler(webapp2.RequestHandler) :
                 'long_term_debt' : ratios.long_term_debt,
                 'free_cash_flow' : ratios.recent_free_cash_flow,
                 'debt_payoff_time' : ratios.debt_payoff_time,
+                'pe_high' : pe_ratios.pe_high if pe_ratios else 'null',
+                'pe_low' : pe_ratios.pe_low if pe_ratios else 'null'
             }
             renderTemplate(self.response, 'json/big_five_numbers.json', template_values)
 
@@ -150,7 +156,21 @@ class SearchHandler(webapp2.RequestHandler) :
       if not success:
         self.ratios = None
 
+    def fetch_pe_ratios(self):
+      self.pe_ratios = MSNMoney(self.ticker_symbol)
+      pe_ratios_rpc = urlfetch.create_rpc()
+      self.rpcs.append(pe_ratios_rpc)
+      pe_ratios_rpc.callback = functools.partial(self.parse_pe_ratios, pe_ratios_rpc)
+      logging.info(self.pe_ratios.url)
+      urlfetch.make_fetch_call(pe_ratios_rpc, self.pe_ratios.url)
 
+    def parse_pe_ratios(self, rpc):
+      if not self.pe_ratios:
+        return
+      result = rpc.get_result()
+      success = self.pe_ratios.parse(result.content)
+      if not success:
+        self.pe_ratios = None
 
 
 
