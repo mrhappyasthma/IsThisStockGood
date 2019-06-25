@@ -111,7 +111,6 @@ class MorningstarRatios:
         self.recent_free_cash_flow = self.free_cash_flow[-1] * 1000000
     except Exception as e:
       logging.error(traceback.format_exc())
-      logging.info(data)
       return False
     return True
 
@@ -177,8 +176,6 @@ def extract_averages_from_data_for_key(raw_data, key):
     return None
   # Grab the second-to-last element for each list since we want to skip the
   # last quarter value.
-  logging.info(raw_data)
-  logging.info(index)
   year_over_year = float(raw_data[index][-2]) if raw_data[index][-2] else None
   average_3 = float(raw_data[index+1][-2]) if raw_data[index+1][-2] else None
   average_5 = float(raw_data[index+2][-2]) if raw_data[index+2][-2] else None
