@@ -102,6 +102,7 @@ class SearchHandler(webapp2.RequestHandler) :
                 'long_term_debt' : ratios.long_term_debt,
                 'free_cash_flow' : ratios.recent_free_cash_flow,
                 'debt_payoff_time' : ratios.debt_payoff_time,
+                'debt_equity_ratio' : ratios.debt_equity_ratio if ratios.debt_equity_ratio >= 0 else -1,
                 'pe_high' : pe_ratios.pe_high if pe_ratios else 'null',
                 'pe_low' : pe_ratios.pe_low if pe_ratios else 'null'
             }

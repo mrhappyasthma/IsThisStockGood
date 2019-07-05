@@ -52,12 +52,14 @@ $(document).ready(function() {
       $('#morningstar_analysis_pdf').attr('href', 'http://quotes.morningstar.com/stockq/analysis-report?&t=' + $ticker)
 
       // Update moat and management numbers.
+      updateHtmlWithValueForKey(data, 'debt_equity_ratio', true)
+      colorCellWithIDForZeroBasedRange('#debt_equity_ratio', [1, 2, 3]);
       updateHtmlWithValueForKey(data, 'long_term_debt', true)
       updateHtmlWithValueForKey(data, 'free_cash_flow', true)
       var cash_flow = $('#free_cash_flow').html();
       if (parseInt(cash_flow) >= 0) {
         updateHtmlWithValueForKey(data, 'debt_payoff_time', false);
-        colorCellWithIDForRange('#debt_payoff_time', [5, 4, 0]);
+        colorCellWithIDForZeroBasedRange('#debt_payoff_time', [2, 3, 4]);
       } else {
         $('#debt_payoff_time').html('Negative Cash Flow');
         $('#debt_payoff_time').css('background-color', Color.red());
@@ -96,7 +98,7 @@ function updateBigFiveHtmlWithDataForKey(data, key) {
       color = (i == 0) ? Color.red() :  Color.white()
       $(element_id).css('background-color', color);
     } else {
-      colorCellWithIDForRange(element_id, [0, 5, 10]);
+      colorCellWithIDForRange(element_id, [0, 5, 10], true);
     }
   }
 }
@@ -114,5 +116,22 @@ function colorCellWithIDForRange(id, range) {
     } else if (value >= range[0]) {
       backgroundColor = Color.orange();
     }
+    $(id).css('background-color', backgroundColor);
+}
+
+function colorCellWithIDForZeroBasedRange(id, range) {
+    if (range.length != 3) {
+      return;
+    }
+    value = $(id).html();
+    var backgroundColor = Color.green();
+    if (value >= range[2]) {
+      backgroundColor = Color.red();
+    } else if (value >= range[1]) {
+      backgroundColor = Color.orange();
+    } else if (value >= range[0]) {
+      backgroundColor = Color.yellow();
+    }
+
     $(id).css('background-color', backgroundColor);
 }

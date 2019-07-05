@@ -89,6 +89,7 @@ class MorningstarRatios:
     self.long_term_debt = 0
     self.recent_free_cash_flow = 0
     self.debt_payoff_time = 0
+    self.debt_equity_ratio = -1
 
   def parse_finances(self, data):
     try:
@@ -135,6 +136,11 @@ class MorningstarRatios:
       self.eps_averages = extract_averages_from_data_for_key(self.ratios_data, 'EPS %')
       if not self.eps_averages:
         logging.error('Failed to parse EPS averages.')
+      debt_equity = extract_float_data_for_key(self.ratios_data, 'Debt/Equity')
+      if not debt_equity or not len(debt_equity):
+        logging.error('Failed to parse Debt-to-Equity ratio.')
+      else:
+        self.debt_equity_ratio = debt_equity[-1]
     except Exception as e:
       logging.error(traceback.format_exc())
       return False
