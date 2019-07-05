@@ -21,10 +21,10 @@ a[href=""] {
 
 /** Tooltip source: https://www.webfx.com/blog/web-design/css-only-tooltips/ */
 .tooltip {
-  border-bottom: 1px dotted #000000;
+  /** border-bottom: 1px dotted #000000; */
   color: #000000;
   outline: none;
-  cursor: help;
+  /** cursor: help; */
   text-decoration: none;
   position: relative;
 }
@@ -32,6 +32,9 @@ a[href=""] {
   margin-left: -999em;
   position: absolute;
 }
+
+/** Temporarily disabled
+
 .tooltip:hover span {
   border-radius: 5px 5px;
   -moz-border-radius: 5px;
@@ -60,14 +63,15 @@ a[href=""] {
   display: block;
   padding: 0.2em 0 0.6em 0;
 }
+* html a:hover {
+  background: transparent;
+ }
+*/
 .classic {
   padding: 0.8em 1em;
  }
 .custom {
   padding: 0.3em 0.8em 0.8em 1.5em;
- }
-* html a:hover {
-  background: transparent;
  }
 .classic {
   background: #FFFFAA;
