@@ -12,9 +12,37 @@ import RuleOneInvestingCalculations as RuleOne
 
 class RuleOneInvestingCalculationsTest(unittest.TestCase):
 
-  def test_compound_annual_growth_rate(self):
+  def test_compound_annual_growth_rate_increase(self):
     growth_rate = RuleOne.compound_annual_growth_rate(2805000, 108957000, 8)
-    self.assertEqual(growth_rate, 57.57)
+    self.assertEqual(growth_rate, 58.0)
+
+  def test_compound_annual_growth_rate_decrease(self):
+    growth_rate = RuleOne.compound_annual_growth_rate(108957000, 2805000, 8)
+    self.assertEqual(growth_rate, -36.71)
+
+  def test_compound_annual_growth_rate_single_negative_increasing(self):
+    growth_rate = RuleOne.compound_annual_growth_rate(-2805000, 108957000, 8)
+    # This is an approxiate since we can't really compute this value for a
+    # negative.
+    self.assertEqual(growth_rate, 59.0)
+
+  def test_compound_annual_growth_rate_single_negative_decreasing(self):
+    growth_rate = RuleOne.compound_annual_growth_rate(2805000, -108957000, 8)
+    # This is an approxiate since we can't really compute this value for a
+    # negative.
+    self.assertEqual(growth_rate, -58.51)
+
+  def test_compound_annual_growth_rate_both_negative_decrease(self):
+    growth_rate = RuleOne.compound_annual_growth_rate(-2805000, -108957000, 8)
+    # We can't really compute negative growth rates, so this is the inverse
+    # of the positive growth rate.
+    self.assertEqual(growth_rate, -58.0)
+
+  def test_compound_annual_growth_rate_both_negative_increase(self):
+    growth_rate = RuleOne.compound_annual_growth_rate(-108957000, -2805000, 8)
+    # We can't really compute negative growth rates, so this is the inverse
+    # of the positive growth rate.
+    self.assertEqual(growth_rate, 36.71)
 
   def test_slope_of_best_fit_line_for_data(self):
     data = [1.3, 2.5, 3.5, 8.5]

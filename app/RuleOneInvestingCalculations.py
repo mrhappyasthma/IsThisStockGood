@@ -1,8 +1,8 @@
 """A collection of functions to compute investing calculations from Rule #1."""
 
-
+from __future__ import division
 import math
-import numpy as np
+#import numpy as np
 
 
 def compound_annual_growth_rate(start_balance, end_balance, years):
@@ -16,13 +16,21 @@ def compound_annual_growth_rate(start_balance, end_balance, years):
   if start_balance == 0 or years == 0:
     return None
   exponent = 1.0 / years
+  result = 0
   difference = end_balance / start_balance
-  negative = (difference < 0)
-  if negative:
-    difference = difference * -1
-  result = round((pow(difference, exponent) - 1.0) * 100 , 2)
-  if negative:
-    result = result * -1
+  if difference > 0:  # The numbers are either both positive or both negative
+    difference = end_balance / start_balance
+    result = round((pow(difference, exponent) - 1.0) * 100 , 2)
+  else:  # One, and only one, of the numbers is negative
+    # We can't really calculate a real growth rate for these cases, so let's double
+    # an approximateion to have something to show.
+    if start_balance < end_balance:  # start_balance is negative
+      difference = (end_balance - (2.0 * start_balance)) / (-1.0 * start_balance)
+    else:  # end_balance is negative
+      difference = ((-1 * end_balance) + start_balance) / start_balance
+    result = round((pow(difference, exponent) - 1.0) * 100 , 2)
+  if end_balance < 0:
+    result = -1 * result
   return result
 
 
@@ -38,8 +46,8 @@ def slope_of_best_fit_line_for_data(data):
   """
   if not data or len(data) < 2:
     return None
-  m,b = np.polyfit(range(0, len(data)), data, 1)
-  return m
+#  m,b = np.polyfit(range(0, len(data)), data, 1)
+#  return m
 
 
 def max_position_size(share_price, trade_volume):
