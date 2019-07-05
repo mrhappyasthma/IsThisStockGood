@@ -54,8 +54,14 @@ $(document).ready(function() {
       // Update moat and management numbers.
       updateHtmlWithValueForKey(data, 'long_term_debt', true)
       updateHtmlWithValueForKey(data, 'free_cash_flow', true)
-      updateHtmlWithValueForKey(data, 'debt_payoff_time', false)
-      colorCellWithIDForRange('#debt_payoff_time', [5, 4, 0])
+      var cash_flow = $('#free_cash_flow').html();
+      if (parseInt(cash_flow) >= 0) {
+        updateHtmlWithValueForKey(data, 'debt_payoff_time', false);
+        colorCellWithIDForRange('#debt_payoff_time', [5, 4, 0]);
+      } else {
+        $('#debt_payoff_time').html('Negative Cash Flow');
+        $('#debt_payoff_time').css('background-color', Color.red());
+      }
       updateBigFiveHtmlWithDataForKey(data, 'eps');
       updateBigFiveHtmlWithDataForKey(data, 'sales');
       updateBigFiveHtmlWithDataForKey(data, 'equity');
