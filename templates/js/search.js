@@ -44,8 +44,11 @@ $(document).ready(function() {
     posting.done(function(json_data) {
       data = JSON.parse(json_data);
       if (data['error']) {
-        $('#errorModalMessage').text(data['error'])
-        $('#errorModal').modal('show')
+        $.snackbar({
+          content: data['error'],
+          style: 'toast',
+          timeout: 3500
+        });
         return;
       }
 
