@@ -6,5 +6,10 @@
     {% include "management.html" %}
     {% include "margin_of_safety.html" %}
     {% include "market_cap.html" %}
-    {% include "resources.html" %}
+    <script>
+      // Initialize all popover elements for the Bootstrap plugin.
+      $(document).ready(function(){
+        $('[data-toggle="popover"]').popover({ trigger: "hover" });
+      });
+    </script>
 	{% endblock %}

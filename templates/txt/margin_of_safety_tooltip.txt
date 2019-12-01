@@ -7,4 +7,4 @@ calculation based on a few key factors such as historical growth, projected
 future growth, and earnings-per-share. Then take this fair value and divide
 it in half to get the price to buy at with a 50% margin of safety. For more
 information, read the following chapters from Rule #1 Investing: chapter 8
-"Demand a Margin of Safety" and chapter 9 "Calculate the Sticker Price".
+'Demand a Margin of Safety' and chapter 9 'Calculate the Sticker Price'.

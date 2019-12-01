@@ -1,5 +1,5 @@
 In order to make a confident investment, the goal is to buy strong business with
-good track records and a durable competitive advantage (i.e. a "moat" -- like
+good track records and a durable competitive advantage (i.e. a 'moat' -- like
 one that surrounds a castle). In order to determine this, we look at 5 key
 growth rates (listed in order of importance): Return on Invested Capital (ROIC),
 Equity (also called Book Value Per Share or BVPS), Earnings Per Share (EPS),
@@ -7,5 +7,5 @@ Sales/Revenue, Free Cash Flow. Ideally you want to see each of these values
 being greater than 10% for the past 10 years. And they should be increasing
 from year to year. Seeing either of these trends is a good sign that the company
 is an industry leader with a strong moat. For more information, read the
-following chapters from Rule #1 Investing: chapter 4 "Identify a Moat", chapter
-5 "The Big Five Numbers", and chapter 6 "Calculating the Big Five".
+following chapters from Rule #1 Investing: chapter 4 'Identify a Moat', chapter
+5 'The Big Five Numbers', and chapter 6 'Calculating the Big Five'.

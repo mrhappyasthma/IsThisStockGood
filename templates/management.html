@@ -1,53 +1,42 @@
-<section id="Management">
-  <h2>
-    <center>
-      <a class="tooltip">
-        Management
-        <span class="custom help" style="top: 8em;">
-          <img src="/img/Help.png" alt="Information" height="48" width="48" />
-          <em style="text-align:left">Management</em>
-          <p style="text-align:left">{% include "txt/management_tooltip.txt" %}</p>
-        </span>
-      </a>
-    </center>
-  </h2>
-  <center>
-    <div id="debt">
-      <table>
-        <tr id="debt_title_labels">
-          <th>
-            Long term debt
-          </th>
-          <th>
-            Free cash flow
-          </th>
-          <th>
-            Years to pay off debt
-          </th>
-        </tr>
+<div class="container pt-2" id="Management">
+  <div class="row justify-content-center">
+    <button
+        type="button"
+        class="btn btn-raised btn-lg btn-primary"
+        data-toggle="popover"
+        title="Management"
+        data-content="{% include 'txt/management_tooltip.txt' %}"
+    >Management</button>
+  </div>
+  <div class="row pt-3 justify-content-center">
+    <div class="col">
+      <table class="table table-bordered text-center">
+        <thead class="thead-light">
+          <tr id="debt_title_labels">
+            <th>Long term debt</th>
+            <th>Free cash flow</th>
+            <th>Years to pay off debt</th>
+          </tr>
+        </thead>
         <tr>
-          <td id="long_term_debt">
-            -
-          </td>
-          <td id="free_cash_flow">
-            -
-          </td>
-          <td id="debt_payoff_time">
-            -
-          </td>
-        </tr>
+          <td id="long_term_debt">-</td>
+          <td id="free_cash_flow">-</td>
+          <td id="debt_payoff_time">-</td>
+       </tr>
       </table>
-      <br>
-      <table>
+    </div>
+
+    <div class="col">
+      <table class="table table-bordered text-center">
         <tr id="debt_equity_title_label">
-          <th>
-            Debt-to-Equity Ratio (Most recent quarter)
-          </th>
+          <thead class="thead-light">
+            <th>Debt-to-Equity Ratio (Most recent quarter)</th>
+          </thead>
           <td id="debt_equity_ratio">
             -
           </td>
         </tr>
       </table>
     </div>
-  </center>
-</section>
+  </div>
+</div>

@@ -1,5 +1,5 @@
 Determining effective management is one of the more difficult tasks. Ideally we
-want the management to be "driven" and "owner-oriented". In other words, we want
+want the management to be 'driven' and 'owner-oriented'. In other words, we want
 them to be on the same team as the investors. They should have their priorities
 of growing the company long-term in the same way investors want to invest
 long-term. This can usually be inferred by their compensation strategy. If they
@@ -11,5 +11,5 @@ read up on the background of the CEO to see if they have a proven track record.
 Lastly, the management should be effective at managing debt. Ideally the company
 should have no more than 3-times as much debt as their free cash flow, otherwise
 interest rates can become a problem and accumulating more debt becomes risky.
-For more information, ready chapter 7 "Bet on the Jockey" from Rule #1
+For more information, ready chapter 7 'Bet on the Jockey' from Rule #1
 Investing.

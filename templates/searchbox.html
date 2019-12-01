@@ -1,20 +1,32 @@
-<div id="searchbox">
-  <center>
-    <form id="searchboxform" action="/search" method="post">
-      <input type="text" id="ticker" placeholder="Ticker Symbol"
-             maxlength=5 onkeydown="return validateInput(event)"/>
-      <input type="submit" value="Analyze" />
-    </form>
-  </center>
+<div class="container pt-4" "id="searchbox">
+  <form id="searchboxform" action="/search" method="post">
+    <div class="form-group row justify-content-center">
+      <div class="col-md-2 nopadding">
+        <input
+            type="text"
+            class="form-control"
+            id="ticker"
+            placeholder="Ticker Symbol"
+            maxlength=5
+            onkeydown="return validateInput(event)"/>
+      </div>
+      <div class="col-md-1 nopadding">
+        <button
+            type="submit"
+            class="btn btn-raised btn-md btn-warning"
+        >Analyze</button>
+      </div>
+    </div>
+  </form>
 </div>
 
 <script>
   // Returns `true` if the key is an alphabetic keystroke or the backspace
   // key.
   function validateInput(event) {
-    var key = event.keyCode;
-    const var backspaceKey = 8;
-    const var periodKey = 190;
+    let key = event.keyCode;
+    const backspaceKey = 8;
+    const periodKey = 190;
     return ((key >= 65 && key <= 90) || key == backspaceKey || key == periodKey);
   };
 </script>

@@ -1,16 +1,11 @@
-<section id="Meaning">
-  <header>
-    <h2>
-      <center>
-        <a class="tooltip">
-          Meaning
-          <span class="custom help">
-            <img src="/img/Help.png" alt="Information" height="48" width="48" />
-            <em style="text-align:left">Meaning</em>
-            <p style="text-align:left">{% include "txt/meaning_tooltip.txt" %}</p>
-          </span>
-        </a>
-      </center>
-    </h2>
-  </header>
-</section>
+<div class="container pb-2 pt-2" id="Meaning">
+  <div class="row justify-content-center">
+    <button
+        type="button"
+        class="btn btn-raised btn-lg btn-primary"
+        data-toggle="popover"
+        title="Meaning"
+        data-content="{% include 'txt/meaning_tooltip.txt' %}"
+    >Meaning</button>
+  </div>
+</div>

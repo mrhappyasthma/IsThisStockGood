@@ -1,14 +1,11 @@
-<section id="Market Cap">
-  <h2>
-    <center>
-      <a class="tooltip">
-        Market Cap
-        <span class="custom help" style="top: 12em;">
-          <img src="/img/Help.png" alt="Information" height="48" width="48" />
-          <em style="text-align:left">Market Cap</em>
-          <p style="text-align:left">{% include "txt/market_cap_tooltip.txt" %}</p>
-        </span>
-      </a>
-    </center>
-  </h2>
-</section>
+<div class="container pb-2 pt-2" id="Market Cap">
+  <div class="row justify-content-center">
+    <button
+        type="button"
+        class="btn btn-raised btn-lg btn-primary"
+        data-toggle="popover"
+        title="Market Cap"
+        data-content="{% include 'txt/market_cap_tooltip.txt' %}"
+    >Market Cap</button>
+  </div>
+</div>
