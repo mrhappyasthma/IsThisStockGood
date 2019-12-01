@@ -128,6 +128,12 @@ function colorCellWithIDForZeroBasedRange(id, range) {
       return;
     }
     value = $(id).html();
+    if (value == -1) {
+      $(id).text('-');
+      $(id).css('background-color', Color.white());
+      return;
+    }
+
     let backgroundColor = Color.green();
     if (value >= range[2]) {
       backgroundColor = Color.red();
