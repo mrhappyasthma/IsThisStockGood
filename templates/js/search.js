@@ -1,15 +1,15 @@
 class Color {
 
   static green() {
-    return '#00AF41';
+    return '#C3E6CB';
   }
 
   static orange() {
-    return '#FF9933';
+    return '#FFD8A8';
   }
 
   static red() {
-    return '#EE6767';
+    return '#ffbdc4';
   }
 
   static white() {
@@ -17,7 +17,7 @@ class Color {
   }
 
   static yellow() {
-    return '#FFFF66';
+    return '#FFF0B5';
   }
 }
 
@@ -28,17 +28,17 @@ $(document).ready(function() {
     event.preventDefault();
 
     // Extract the URL path for the action.
-    var $form = $(this);
+    let $form = $(this);
     path = $form.attr('action');
 
     // Extract the ticker symbol.
-    var $ticker = $('#ticker').val();
+    let $ticker = $('#ticker').val();
     if ($ticker.length == 0) {
       return
     }
 
     // Post the data to the path.
-    var posting = $.post(path, { ticker: $ticker } );
+    let posting = $.post(path, { ticker: $ticker } );
 
     // Update the HTML with the results.
     posting.done(function(json_data) {
@@ -56,7 +56,7 @@ $(document).ready(function() {
       colorCellWithIDForZeroBasedRange('#debt_equity_ratio', [1, 2, 3]);
       updateHtmlWithValueForKey(data, 'long_term_debt', true)
       updateHtmlWithValueForKey(data, 'free_cash_flow', true)
-      var cash_flow = $('#free_cash_flow').html();
+      let cash_flow = $('#free_cash_flow').html();
       if (parseInt(cash_flow) >= 0) {
         updateHtmlWithValueForKey(data, 'debt_payoff_time', false);
         colorCellWithIDForZeroBasedRange('#debt_payoff_time', [2, 3, 4]);
@@ -84,11 +84,11 @@ function updateHtmlWithValueForKey(data, key, commas) {
 }
 
 function updateBigFiveHtmlWithDataForKey(data, key) {
-  var row_data = data[key];
-  var suffixes = ['_1_val', '_3_val', '_5_val', '_max_val'];
-  for (var i = 0; i < suffixes.length; i++) {
-    var element_id = '#' + key + suffixes[i];
-    var value = '-';
+  let row_data = data[key];
+  let suffixes = ['_1_val', '_3_val', '_5_val', '_max_val'];
+  for (let i = 0; i < suffixes.length; i++) {
+    let element_id = '#' + key + suffixes[i];
+    let value = '-';
     if (i < row_data.length) {
       value = row_data[i];
     }
@@ -108,7 +108,7 @@ function colorCellWithIDForRange(id, range) {
       return;
     }
     value = $(id).html();
-    var backgroundColor = Color.red();
+    let backgroundColor = Color.red();
     if (value >= range[2]) {
       backgroundColor = Color.green();
     } else if (value >= range[1]) {
@@ -124,7 +124,7 @@ function colorCellWithIDForZeroBasedRange(id, range) {
       return;
     }
     value = $(id).html();
-    var backgroundColor = Color.green();
+    let backgroundColor = Color.green();
     if (value >= range[2]) {
       backgroundColor = Color.red();
     } else if (value >= range[1]) {
