@@ -38,6 +38,8 @@ def jsonpToCSV(s):
   output = output.replace(',\n', '\n')
   output = output.replace(' ,', ' ')
   output = output.replace('&mdash;', '')
+  if len(output) == 0:
+    return ''
   return output[1:] if output[0] == ',' else output
 
 def renderTemplate(response, templatename, templatevalues) :
