@@ -44,7 +44,8 @@ $(document).ready(function() {
     posting.done(function(json_data) {
       data = JSON.parse(json_data);
       if (data['error']) {
-        alert(data['error']);
+        $('#errorModalMessage').text(data['error'])
+        $('#errorModal').modal('show')
         return;
       }
 
