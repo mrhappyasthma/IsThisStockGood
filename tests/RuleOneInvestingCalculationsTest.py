@@ -5,7 +5,7 @@ import os
 import sys
 import unittest
 
-app_path = os.path.join(os.path.dirname(__file__), "..", 'app')
+app_path = os.path.join(os.path.dirname(__file__), "..", 'src')
 sys.path.append(app_path)
 
 import RuleOneInvestingCalculations as RuleOne

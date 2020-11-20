@@ -1,22 +1,18 @@
-application: isthisstockgood
-version: 1
-runtime: python27
-api_version: 1
-threadsafe: true
-
-libraries:
-- name: numpy
-  version: "1.6.1"
-- name: lxml
-  version: "3.7.3"
+runtime: python38
+# Limit the number of instances to limit costs to keep it under the free quota.
+# More details available at: https://cloud.google.com/appengine/docs/managing-costs
+automatic_scaling:
+  max_instances: 1
 
 handlers:
 - url: /css
   static_dir: css
 - url: /img
   static_dir: img
-- url: /js
-  static_dir: js
+  # This handler routes all requests not caught above to your main app. It is
+  # required when static routes are defined, but can be omitted (along with
+  # the entire handlers section) when there are no static files defined.
 - url: /.*
-  script: app.Controller.application
+  script: auto
   secure: always
+  redirect_http_response_code: 301

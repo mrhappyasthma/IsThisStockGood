@@ -1,6 +1,5 @@
 import logging
 from lxml import html
-import urllib2
 
 def isfloat(value):
   if value is None:

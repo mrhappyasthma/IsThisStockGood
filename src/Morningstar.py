@@ -5,9 +5,8 @@ python data structures
 
 import csv
 import logging
-import RuleOneInvestingCalculations as RuleOne
+import src.RuleOneInvestingCalculations as RuleOne
 import traceback
-import urllib2
 
 class MorningstarReport:
   BASE_URL = 'http://financials.morningstar.com/ajax/ReportProcess4CSV.html?t={}&reportType={}&period={}&dataType=A&order={}&number={}'
