@@ -55,9 +55,6 @@ $(document).ready(function() {
         return;
       }
 
-      // Update resources.
-      $('#morningstar_analysis_pdf').attr('href', 'http://quotes.morningstar.com/stockq/analysis-report?&t=' + $ticker)
-
       // Update moat and management numbers.
       updateHtmlWithValueForKey(data, 'debt_equity_ratio', true)
       colorCellWithIDForZeroBasedRange('#debt_equity_ratio', [1, 2, 3]);
