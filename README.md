@@ -18,3 +18,41 @@ NOTE: This site is for personal investing purposes only. Any analysis on this si
 should be used at your own discretion. Obviously investing always carries some risk,
 but if you follow the principles in Rule #1 investing, then this site should be a
 "one stop shop" for all the calculations/resources you may need.
+
+## Running the site locally.
+
+1. Clone the repo.
+2. Install python3, if you haven't already.
+3. Run the following command to install the dependencies:
+```
+python3 -m pip install -r requirements.txt
+```
+4. `cd` into the directory and create a `virtualenv` by running:
+```
+virtualenv flask
+```
+5. Run the following command:
+```
+source /env/Scripts/activate
+```
+You should now seek `(flask)` in your terminal prompt.
+6. Run the `main.py` with:
+```
+python3 main.py
+```
+
+## Deploying the site
+
+If you haven't already, install the [Google Cloud SDK](https://cloud.google.com/sdk/docs/install)
+
+If it's your first time deploying, run:
+
+```
+gcloud init
+```
+
+If you already have an initialized repository, then simply run
+
+```
+gcloud app deploy app.yaml
+```
