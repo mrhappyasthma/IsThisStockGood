@@ -8,58 +8,6 @@ import logging
 import src.RuleOneInvestingCalculations as RuleOne
 import traceback
 
-class MorningstarReport:
-  BASE_URL = 'http://financials.morningstar.com/ajax/ReportProcess4CSV.html?t={}&reportType={}&period={}&dataType=A&order={}&number={}'
-
-  TYPE_INCOME_STATEMENT = 'is'
-  TYPE_CASH_FLOW = 'cf'
-  TYPE_BALANCE_SHEET = 'bs'
-
-  PERIOD_ANNUAL = '12'
-  PERIOD_QUARTERLY = '3'
-
-  ORDER_ASCENDING = 'asc'
-  ORDER_DESCENDING = 'desc'
-
-  UNIT_NONE = '1'
-  UNIT_THOUSANDS = '2'
-  UNIT_MILLIONS = '3'
-  UNIT_BILLIONS = '4'
-
-
-  @classmethod
-  def construct_url(cls, ticker_symbol, type, period, order=ORDER_ASCENDING, unit=UNIT_MILLIONS):
-    url = MorningstarReport.BASE_URL.format(ticker_symbol, type, period, order, unit)
-    return url
-
-  def __init__(self, ticker_symbol, type, period):
-    self.ticker_symbol = ticker_symbol
-    self.type = type
-    self.period = period
-    self.raw_data = []
-    self.net_income = []
-    self.ttm_net_income = -1
-    self.url = MorningstarReport.construct_url(ticker_symbol, type, period)
-
-  def parse_report(self, data):
-    try:
-      csv_reader = csv.reader(data)
-      for row in csv_reader:
-        self.raw_data.append(row)
-    except Exception as e:
-      logging.error(traceback.format_exc())
-      return False
-
-    if self.type == MorningstarReport.TYPE_INCOME_STATEMENT:
-      self.parse_income_statement()
-    return True
-
-  def parse_income_statement(self):
-    self.net_income = extract_float_data_for_key(self.raw_data, 'Net income', True)
-    if not self.net_income:
-      logging.error('Cannot parse net_income.')
-    else:
-      self.ttm_net_income = self.net_income[-1]
 
 class MorningstarRatios:
   """An object holding """
@@ -85,6 +33,8 @@ class MorningstarRatios:
     self.free_cash_flow_averages = []
     self.sales_averages = []  # Revenue
     self.eps_averages = []  # Earnings per share
+    self.ttm_eps = 0
+    self.ttm_net_income = 0
     self.long_term_debt = 0
     self.recent_free_cash_flow = 0
     self.debt_payoff_time = 0
@@ -109,6 +59,17 @@ class MorningstarRatios:
         logging.error('Failed to parse Free Cash Flow.')
       else:
         self.recent_free_cash_flow = self.free_cash_flow[-1] * 1000000
+      net_income = extract_float_data_for_key(self.finance_data, 'Net Income USD Mil', include_ttm=True)
+      if not net_income:
+        logging.error('Failed to parse Net Income')
+      else:
+        self.ttm_net_income = net_income[-1]
+      eps = extract_float_data_for_key(self.finance_data, 'Earnings Per Share USD', include_ttm=True)
+      if not eps:
+        logging.error('Failed to parse Earnings Per Share from finances')
+      else:
+        self.ttm_eps = eps[-1]
+
     except Exception as e:
       logging.error(traceback.format_exc())
       return False

@@ -6,7 +6,6 @@ from datetime import date
 from flask import Flask, request, render_template
 from requests_futures.sessions import FuturesSession
 from src.Morningstar import MorningstarRatios
-from src.Morningstar import MorningstarReport
 from src.MSNMoney import MSNMoney
 
 
@@ -70,7 +69,6 @@ def search():
   # the json results.
 
   search_handler.fetch_morningstar_ratios()
-  search_handler.fetch_income_statement()
   search_handler.fetch_pe_ratios()
   for rpc in search_handler.rpcs:
     # Wait for each RPC result before proceeding.
@@ -78,9 +76,8 @@ def search():
   ratios = search_handler.ratios
   if ratios:
     ratios.calculate_long_term_debt()
-  income = search_handler.income_statement
   pe_ratios = search_handler.pe_ratios
-  if not ratios or not income:
+  if not ratios:
     return render_template('json/error.json', **{'error' : 'Invalid ticker symbol'})
   template_values = {
     'roic': ratios.roic_averages if ratios.roic_averages else [],
@@ -92,9 +89,12 @@ def search():
     'free_cash_flow' : ratios.recent_free_cash_flow,
     'debt_payoff_time' : ratios.debt_payoff_time,
     'debt_equity_ratio' : ratios.debt_equity_ratio if ratios.debt_equity_ratio >= 0 else -1,
+    'ttm_eps' : ratios.ttm_eps if ratios.ttm_eps else 'null',
+    'ttm_net_income' : ratios.ttm_net_income if ratios.ttm_net_income else 'null',
     'pe_high' : pe_ratios.pe_high if pe_ratios else 'null',
     'pe_low' : pe_ratios.pe_low if pe_ratios else 'null'
   }
+  print(template_values)
   return render_template('json/big_five_numbers.json', **template_values)
 
 
@@ -104,28 +104,7 @@ class SearchHandler():
     self.ticker_symbol = ''
     self.ratios = None
     self.pe_ratios = None
-    self.income_statement = None
     self.error = False
-
-  def fetch_income_statement(self):
-    self.income_statement = \
-        MorningstarReport(self.ticker_symbol, \
-                          MorningstarReport.TYPE_INCOME_STATEMENT, \
-                          MorningstarReport.PERIOD_QUARTERLY)
-    logging.info(self.income_statement.url)
-    session = FuturesSession()
-    rpc = session.get(self.income_statement.url, hooks={
-       'response': self.parse_income_statement,
-    })
-    self.rpcs.append(rpc)
-
-  # Called asynchronously upon completion of the URL fetch from
-  # `fetch_income_statement`.
-  def parse_income_statement(self, response, *args, **kwargs):
-    result = response.text
-    success = self.income_statement.parse_report(result.split('\n'))
-    if not success:
-      self.income_statement = None
 
   def fetch_morningstar_ratios(self):
     self.ratios = MorningstarRatios(self.ticker_symbol)
