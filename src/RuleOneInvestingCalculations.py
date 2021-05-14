@@ -129,13 +129,13 @@ def rule_one_margin_of_safety_price(current_eps, estimated_growth_rate,
   future_eps = calculate_future_eps(current_eps, estimated_growth_rate)
   future_pe = calculate_future_pe(estimated_growth_rate, historical_low_pe,
                                   historical_high_pe)
-  future_price = calculate_estimated_future_price(future_eps, future_pe_value)
+  future_price = calculate_estimated_future_price(future_eps, future_pe)
   sticker_price = calculate_sticker_price(future_price)
   margin_of_safety = calculate_margin_of_safety(sticker_price)
   return margin_of_safety
 
 
-def calculate_future_eps(current_esp, estimated_growth_rate, time_horizon=10):
+def calculate_future_eps(current_eps, estimated_growth_rate, time_horizon=10):
   """
   Calculates the estimated future earnings-per-share (EPS) value in 10 years.
 
