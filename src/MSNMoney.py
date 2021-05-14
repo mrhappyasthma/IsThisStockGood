@@ -33,7 +33,7 @@ class MSNMoney:
     return node.text
 
   def parse(self, content):
-    tree = html.fromstring(content)
+    tree = html.fromstring(bytes(content, encoding='utf8'))
     tree_iterator = tree.iter()
     for element in tree_iterator:
       text = element.text

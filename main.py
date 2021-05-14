@@ -165,7 +165,7 @@ class SearchHandler():
   def fetch_pe_ratios(self):
     self.pe_ratios = MSNMoney(self.ticker_symbol)
     session = FuturesSession()
-    rpc = session.get(self.pe_ratios.url, hooks={
+    rpc = session.get(self.pe_ratios.url, allow_redirects=True, hooks={
        'response': self.parse_pe_ratios,
     })
     self.rpcs.append(rpc)
@@ -173,6 +173,8 @@ class SearchHandler():
   # Called asynchronously upon completion of the URL fetch from
   # `fetch_pe_ratios`.
   def parse_pe_ratios(self, response, *args, **kwargs):
+    if response.status_code != 200:
+      return
     if not self.pe_ratios:
       return
     result = response.text
