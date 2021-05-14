@@ -36,6 +36,7 @@ virtualenv flask
 source /flask/Scripts/activate
 ```
 You should now seek `(flask)` in your terminal prompt.
+    
 6. Run the `main.py` with:
 ```
 python3 main.py
