@@ -7,6 +7,7 @@ from flask import Flask, request, render_template
 from requests_futures.sessions import FuturesSession
 from src.Morningstar import MorningstarRatios
 from src.MSNMoney import MSNMoney
+from src.YahooFinance import YahooFinanceAnalysis
 
 
 app = Flask(__name__)
@@ -70,6 +71,7 @@ def search():
 
   search_handler.fetch_morningstar_ratios()
   search_handler.fetch_pe_ratios()
+  search_handler.fetch_yahoo_finance_analysis()
   for rpc in search_handler.rpcs:
     # Wait for each RPC result before proceeding.
     rpc.result()
@@ -77,7 +79,8 @@ def search():
   if ratios:
     ratios.calculate_long_term_debt()
   pe_ratios = search_handler.pe_ratios
-  if not ratios:
+  yahoo_finance_analysis = search_handler.yahoo_finance_analysis
+  if not ratios or not yahoo_finance_analysis:
     return render_template('json/error.json', **{'error' : 'Invalid ticker symbol'})
   template_values = {
     'roic': ratios.roic_averages if ratios.roic_averages else [],
@@ -91,10 +94,10 @@ def search():
     'debt_equity_ratio' : ratios.debt_equity_ratio if ratios.debt_equity_ratio >= 0 else -1,
     'ttm_eps' : ratios.ttm_eps if ratios.ttm_eps else 'null',
     'ttm_net_income' : ratios.ttm_net_income if ratios.ttm_net_income else 'null',
+    'five_year_growth_rate' : yahoo_finance_analysis.five_year_growth_rate if yahoo_finance_analysis.five_year_growth_rate else 'null',
     'pe_high' : pe_ratios.pe_high if pe_ratios else 'null',
     'pe_low' : pe_ratios.pe_low if pe_ratios else 'null'
   }
-  print(template_values)
   return render_template('json/big_five_numbers.json', **template_values)
 
 
@@ -104,6 +107,7 @@ class SearchHandler():
     self.ticker_symbol = ''
     self.ratios = None
     self.pe_ratios = None
+    self.yahoo_finance_analysis = None
     self.error = False
 
   def fetch_morningstar_ratios(self):
@@ -160,6 +164,26 @@ class SearchHandler():
     success = self.pe_ratios.parse(result)
     if not success:
       self.pe_ratios = None
+
+  def fetch_yahoo_finance_analysis(self):
+    self.yahoo_finance_analysis = YahooFinanceAnalysis(self.ticker_symbol)
+    session = FuturesSession()
+    rpc = session.get(self.yahoo_finance_analysis.url, allow_redirects=True, hooks={
+       'response': self.parse_yahoo_finance_analysis,
+    })
+    self.rpcs.append(rpc)
+
+  # Called asynchronously upon completion of the URL fetch from
+  # `fetch_yahoo_finance_analysis`.
+  def parse_yahoo_finance_analysis(self, response, *args, **kwargs):
+    if response.status_code != 200:
+      return
+    if not self.yahoo_finance_analysis:
+      return
+    result = response.text
+    success = self.yahoo_finance_analysis.parse_analyst_five_year_growth_rate(result)
+    if not success:
+      self.yahoo_finance_analysis = None
 
 
 if __name__ == '__main__':

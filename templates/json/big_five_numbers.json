@@ -10,6 +10,7 @@
   "debt_equity_ratio" : {{ debt_equity_ratio }},
   "ttm_eps" : {{ ttm_eps }},
   "ttm_net_income" : {{ ttm_net_income }}
+  "five_year_growth_rate" : {{ five_year_growth_rate }}
   "pe_high" : {{ pe_high }},
   "pe_low" : {{ pe_low }}
 }
