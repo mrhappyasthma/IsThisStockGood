@@ -99,7 +99,7 @@ def search():
     ratios.calculate_long_term_debt()
   pe_ratios = search_handler.pe_ratios
   yahoo_finance_analysis = search_handler.yahoo_finance_analysis
-  if not ratios or not pe_ratios or not yahoo_finance_analysis:
+  if not ratios:
     return render_template('json/error.json', **{'error' : 'Invalid ticker symbol'})
   margin_of_safety_price = calculateMarginOfSafetyPrice(ratios, pe_ratios, yahoo_finance_analysis)
   template_values = {
