@@ -91,6 +91,7 @@ function resetAllCells() {
 function updateHtmlWithValueForKey(data, key, commas) {
   value = data[key];
   if (!value) {
+    $('#' + key).html('Undefined');
     return;
   }
   if (commas) {
