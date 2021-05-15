@@ -45,6 +45,7 @@ $(document).ready(function() {
 
     // Update the HTML with the results.
     posting.done(function(json_data) {
+      console.log(json_data)
       data = JSON.parse(json_data);
       if (data['error']) {
         $.snackbar({
@@ -55,24 +56,31 @@ $(document).ready(function() {
         return;
       }
 
-      // Update moat and management numbers.
-      updateHtmlWithValueForKey(data, 'debt_equity_ratio', true)
-      colorCellWithIDForZeroBasedRange('#debt_equity_ratio', [1, 2, 3]);
-      updateHtmlWithValueForKey(data, 'long_term_debt', true)
-      updateHtmlWithValueForKey(data, 'free_cash_flow', true)
-      let cash_flow = $('#free_cash_flow').html();
-      if (parseInt(cash_flow) >= 0) {
-        updateHtmlWithValueForKey(data, 'debt_payoff_time', false);
-        colorCellWithIDForZeroBasedRange('#debt_payoff_time', [2, 3, 4]);
-      } else {
-        $('#debt_payoff_time').html('Negative Cash Flow');
-        $('#debt_payoff_time').css('background-color', Color.red());
-      }
+      // Update moat numbers.
       updateBigFiveHtmlWithDataForKey(data, 'eps');
       updateBigFiveHtmlWithDataForKey(data, 'sales');
       updateBigFiveHtmlWithDataForKey(data, 'equity');
       updateBigFiveHtmlWithDataForKey(data, 'roic');
       updateBigFiveHtmlWithDataForKey(data, 'cash');
+
+      // Update management numbers.
+      updateHtmlWithValueForKey(data, 'debt_equity_ratio', /*commas=*/true)
+      colorCellWithIDForZeroBasedRange('#debt_equity_ratio', [1, 2, 3]);
+      updateHtmlWithValueForKey(data, 'long_term_debt', /*commas=*/true)
+      updateHtmlWithValueForKey(data, 'free_cash_flow', /*commas=*/true)
+      let cash_flow = $('#free_cash_flow').html();
+      if (parseInt(cash_flow) >= 0) {
+        updateHtmlWithValueForKey(data, 'debt_payoff_time', /*commas=*/false);
+        colorCellWithIDForZeroBasedRange('#debt_payoff_time', [2, 3, 4]);
+      } else {
+        $('#debt_payoff_time').html('Negative Cash Flow');
+        $('#debt_payoff_time').css('background-color', Color.red());
+      }
+
+      // Update margin of safety numbers
+      updateHtmlWithValueForKey(data, 'margin_of_safety_price', /*commas=*/false)
+      // TODO: Display current price.
+      // TODO: Color the current price based off the margin of safety.
     });
   });
 });

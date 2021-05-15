@@ -105,8 +105,8 @@ def payback_time(market_cap, net_income, estimated_growth_rate):
   return years
 
 
-def rule_one_margin_of_safety_price(current_eps, estimated_growth_rate,
-                                    historical_low_pe, historical_high_pe):
+def margin_of_safety_price(current_eps, estimated_growth_rate,
+                           historical_low_pe, historical_high_pe):
   """
   Calculates the value a stock should be purchased at today to have a 50% margin
   of safety given a 10 year timeframe with a minimum projection of 15%-per-year
@@ -126,6 +126,8 @@ def rule_one_margin_of_safety_price(current_eps, estimated_growth_rate,
   Returns:
     The maximum price to buy the stock for with a 50% margin of safety.
   """
+  if not current_eps or not estimated_growth_rate or not historical_low_pe or not historical_high_pe:
+    return None
   future_eps = calculate_future_eps(current_eps, estimated_growth_rate)
   future_pe = calculate_future_pe(estimated_growth_rate, historical_low_pe,
                                   historical_high_pe)
@@ -185,7 +187,8 @@ def calculate_future_pe(estimated_growth_rate, historical_low_pe,
      or not historical_high_pe:
     return None
   future_pe_one = (historical_low_pe + historical_high_pe) / 2.0
-  future_pe_two = 2.0 * estimated_growth_rate
+  # Multiply the growth rate by 100 to convert from a decimal to a percent.
+  future_pe_two = 2.0 * (estimated_growth_rate * 100.0)
   conservative_future_pe = min(future_pe_one, future_pe_two)
   return conservative_future_pe
 

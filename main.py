@@ -2,6 +2,7 @@ import functools
 import logging
 import os
 import re
+import src.RuleOneInvestingCalculations as RuleOne
 from datetime import date
 from flask import Flask, request, render_template
 from requests_futures.sessions import FuturesSession
@@ -45,6 +46,24 @@ def jsonpToCSV(s):
   return output[1:] if output[0] == ',' else output
 
 
+def calculateMarginOfSafetyPrice(ratios, pe_ratios, yahoo_finance_analysis):
+  if not ratios or not pe_ratios or not yahoo_finance_analysis:
+    return None
+
+  if not yahoo_finance_analysis.five_year_growth_rate or not ratios.equity_averages:
+    return None
+  growth_rate = min(float(yahoo_finance_analysis.five_year_growth_rate),
+                    float(ratios.equity_averages[-1]))
+  # Divide the growth rate by 100 to convert from percent to decimal.
+  growth_rate = growth_rate / 100.0
+
+  if not ratios.ttm_eps or not pe_ratios.pe_low or not pe_ratios.pe_high:
+    return None
+  margin_of_safety_price = RuleOne.margin_of_safety_price(float(ratios.ttm_eps), growth_rate,
+                                                          float(pe_ratios.pe_low), float(pe_ratios.pe_high))
+  return margin_of_safety_price
+
+
 @app.route('/')
 def homepage():
   if request.environ['HTTP_HOST'].endswith('.appspot.com'):  #Redirect the appspot url to the custom url
@@ -80,8 +99,9 @@ def search():
     ratios.calculate_long_term_debt()
   pe_ratios = search_handler.pe_ratios
   yahoo_finance_analysis = search_handler.yahoo_finance_analysis
-  if not ratios or not yahoo_finance_analysis:
+  if not ratios or not pe_ratios or not yahoo_finance_analysis:
     return render_template('json/error.json', **{'error' : 'Invalid ticker symbol'})
+  margin_of_safety_price = calculateMarginOfSafetyPrice(ratios, pe_ratios, yahoo_finance_analysis)
   template_values = {
     'roic': ratios.roic_averages if ratios.roic_averages else [],
     'eps': ratios.eps_averages if ratios.eps_averages else [],
@@ -92,11 +112,8 @@ def search():
     'free_cash_flow' : ratios.recent_free_cash_flow,
     'debt_payoff_time' : ratios.debt_payoff_time,
     'debt_equity_ratio' : ratios.debt_equity_ratio if ratios.debt_equity_ratio >= 0 else -1,
-    'ttm_eps' : ratios.ttm_eps if ratios.ttm_eps else 'null',
     'ttm_net_income' : ratios.ttm_net_income if ratios.ttm_net_income else 'null',
-    'five_year_growth_rate' : yahoo_finance_analysis.five_year_growth_rate if yahoo_finance_analysis.five_year_growth_rate else 'null',
-    'pe_high' : pe_ratios.pe_high if pe_ratios else 'null',
-    'pe_low' : pe_ratios.pe_low if pe_ratios else 'null'
+    'margin_of_safety_price' : margin_of_safety_price if margin_of_safety_price else 'null'
   }
   return render_template('json/big_five_numbers.json', **template_values)
 

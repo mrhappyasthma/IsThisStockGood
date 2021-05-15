@@ -8,9 +8,6 @@
   "free_cash_flow" : {{ free_cash_flow }},
   "debt_payoff_time" : {{ debt_payoff_time }},
   "debt_equity_ratio" : {{ debt_equity_ratio }},
-  "ttm_eps" : {{ ttm_eps }},
   "ttm_net_income" : {{ ttm_net_income }},
-  "five_year_growth_rate" : {{ five_year_growth_rate }},
-  "pe_high" : {{ pe_high }},
-  "pe_low" : {{ pe_low }}
+  "margin_of_safety_price" : {{ margin_of_safety_price }}
 }
