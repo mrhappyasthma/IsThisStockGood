@@ -45,7 +45,6 @@ $(document).ready(function() {
 
     // Update the HTML with the results.
     posting.done(function(json_data) {
-      console.log(json_data)
       data = JSON.parse(json_data);
       if (data['error']) {
         $.snackbar({
@@ -91,6 +90,9 @@ function resetAllCells() {
 
 function updateHtmlWithValueForKey(data, key, commas) {
   value = data[key];
+  if (!value) {
+    return;
+  }
   if (commas) {
     value = value.toLocaleString('en', {useGrouping:true});
   } else {
