@@ -1,6 +1,30 @@
+import json
 import logging
 import re
 from lxml import html
+
+
+class YahooFinanceQuote:
+  # Expects the ticker symbol as the only argument.
+  # This can theoretically request multiple comma-separated symbols.
+  # This could theoretically be trimmed down by using `fields=` parameter.
+  URL_TEMPLATE = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols={}'
+
+  @classmethod
+  def _construct_url(cls, ticker_symbol):
+    return YahooFinanceQuote.URL_TEMPLATE.format(ticker_symbol)
+
+  def __init__(self, ticker_symbol):
+    self.ticker_symbol = ticker_symbol
+    self.url = YahooFinanceQuote._construct_url(ticker_symbol)
+    self.current_price = None
+
+  def parse_current_price(self, content):
+    data = json.loads(content)
+    results = data.get('quoteResponse', {}).get('result', [])
+    if results:
+      self.current_price = results[0].get('regularMarketPrice', None)
+    return True if self.current_price else False
 
 
 class YahooFinanceAnalysis:

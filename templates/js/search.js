@@ -78,8 +78,12 @@ $(document).ready(function() {
 
       // Update margin of safety numbers
       updateHtmlWithValueForKey(data, 'margin_of_safety_price', /*commas=*/false)
-      // TODO: Display current price.
-      // TODO: Color the current price based off the margin of safety.
+      updateHtmlWithValueForKey(data, 'current_price', /*commas=*/false)
+      let marginOfSafety = data['margin_of_safety_price']
+      if (marginOfSafety) {
+        let range = [marginOfSafety, marginOfSafety * 1.25, marginOfSafety * 1.5]
+        colorCellWithIDForZeroBasedRange('#current_price', range);
+      }
     });
   });
 });
