@@ -33,7 +33,7 @@ virtualenv flask
 ```
 5. Run the following command:
 ```
-source /flask/Scripts/activate
+source flask/Scripts/activate
 ```
 You should now seek `(flask)` in your terminal prompt.
     
