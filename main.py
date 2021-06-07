@@ -51,10 +51,10 @@ def calculateMarginOfSafetyPrice(ratios, pe_ratios, yahoo_finance_analysis):
   if not ratios or not pe_ratios or not yahoo_finance_analysis:
     return None
 
-  if not yahoo_finance_analysis.five_year_growth_rate or not ratios.equity_averages:
+  if not yahoo_finance_analysis.five_year_growth_rate or not ratios.equity_growth_rates:
     return None
   growth_rate = min(float(yahoo_finance_analysis.five_year_growth_rate),
-                    float(ratios.equity_averages[-1]))
+                    float(ratios.equity_growth_rates[-1]))
   # Divide the growth rate by 100 to convert from percent to decimal.
   growth_rate = growth_rate / 100.0
 
@@ -107,10 +107,10 @@ def search():
   margin_of_safety_price = calculateMarginOfSafetyPrice(ratios, pe_ratios, yahoo_finance_analysis)
   template_values = {
     'roic': ratios.roic_averages if ratios.roic_averages else [],
-    'eps': ratios.eps_averages if ratios.eps_averages else [],
-    'sales': ratios.sales_averages if ratios.sales_averages else [],
-    'equity': ratios.equity_averages if ratios.equity_averages else [],
-    'cash': ratios.free_cash_flow_averages if ratios.free_cash_flow_averages else [],
+    'eps': ratios.eps_growth_rate_averages if ratios.eps_growth_rate_averages else [],
+    'sales': ratios.sales_growth_rate_averages if ratios.sales_growth_rate_averages else [],
+    'equity': ratios.equity_growth_rates if ratios.equity_growth_rates else [],
+    'cash': ratios.free_cash_flow_growth_rates if ratios.free_cash_flow_growth_rates else [],
     'long_term_debt' : ratios.long_term_debt,
     'free_cash_flow' : ratios.recent_free_cash_flow,
     'debt_payoff_time' : ratios.debt_payoff_time,

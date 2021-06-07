@@ -28,11 +28,11 @@ class MorningstarRatios:
     self.roic = []  # Return on invested capital
     self.roic_averages = []
     self.equity = []  # Equity or BVPS (book value per share)
-    self.equity_averages = []
+    self.equity_growth_rates = []
     self.free_cash_flow = []  # Free Cash Flow
-    self.free_cash_flow_averages = []
-    self.sales_averages = []  # Revenue
-    self.eps_averages = []  # Earnings per share
+    self.free_cash_flow_growth_rates = []
+    self.sales_growth_rate_averages = []  # Revenue
+    self.eps_growth_rate_averages = []  # Earnings per share
     self.ttm_eps = 0
     self.ttm_net_income = 0
     self.long_term_debt = 0
@@ -50,11 +50,11 @@ class MorningstarRatios:
         logging.error('No Morningstar finance data')
         return False
       self.equity = extract_float_data_for_key(self.finance_data, 'Book Value Per Share * USD')
-      self.equity_averages = compute_growth_rates_for_data(self.equity)
+      self.equity_growth_rates = compute_growth_rates_for_data(self.equity)
       if not self.equity:
         logging.error('Failed to parse BVPS.')
       self.free_cash_flow = extract_float_data_for_key(self.finance_data, 'Free Cash Flow USD Mil')
-      self.free_cash_flow_averages = compute_growth_rates_for_data(self.free_cash_flow)
+      self.free_cash_flow_growth_rates = compute_growth_rates_for_data(self.free_cash_flow)
       if not self.free_cash_flow:
         logging.error('Failed to parse Free Cash Flow.')
       else:
@@ -86,15 +86,15 @@ class MorningstarRatios:
         logging.error('No Morningstar rtios data')
         return False
       self.roic = extract_float_data_for_key(self.ratios_data, 'Return on Invested Capital %')
-      self.roic_averages = compute_growth_rates_for_data(self.roic)
+      self.roic_averages = compute_averages_for_data(self.roic)
       if not self.roic_averages:
         logging.error('Failed to parse ROIC')
       self.long_term_debt = extract_float_data_for_key(self.ratios_data, 'Long-Term Debt')
-      self.sales_averages = extract_averages_from_data_for_key(self.ratios_data, 'Revenue %')
-      if not self.sales_averages:
+      self.sales_growth_rate_averages = extract_averages_from_data_for_key(self.ratios_data, 'Revenue %')
+      if not self.sales_growth_rate_averages:
         logging.error('Failed to parse Sales Averages')
-      self.eps_averages = extract_averages_from_data_for_key(self.ratios_data, 'EPS %')
-      if not self.eps_averages:
+      self.eps_growth_rate_averages = extract_averages_from_data_for_key(self.ratios_data, 'EPS %')
+      if not self.eps_growth_rate_averages:
         logging.error('Failed to parse EPS averages.')
       debt_equity = extract_float_data_for_key(self.ratios_data, 'Debt/Equity')
       if not debt_equity or not len(debt_equity):
@@ -184,5 +184,27 @@ def compute_growth_rates_for_data(data):
   if len(data) > 6:
     last_index = len(data) - 1
     max = RuleOne.compound_annual_growth_rate(data[0], data[-1], last_index)
+    results.append(max)
+  return [x for x in results if x is not None]
+
+
+def _average(list):
+  return round(sum(list) / len(list), 2)
+
+
+def compute_averages_for_data(data):
+  """Calculates yearly averages from a set of yearly data. Assumes no TTM entry at the end."""
+  if data is None or len(data) < 2:
+    return None
+  results = []
+  results.append(data[-1])
+  if len(data) >= 3:
+    three_year = _average(data[-3:])
+    results.append(three_year)
+  if len(data) >= 5:
+    five_year = _average(data[-5:])
+    results.append(five_year)
+  if len(data) >= 6:
+    max = _average(data)
     results.append(max)
   return [x for x in results if x is not None]
