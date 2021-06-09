@@ -117,7 +117,7 @@ def search():
     'debt_equity_ratio' : ratios.debt_equity_ratio if ratios.debt_equity_ratio >= 0 else -1,
     'ttm_net_income' : ratios.ttm_net_income if ratios.ttm_net_income else 'null',
     'margin_of_safety_price' : margin_of_safety_price if margin_of_safety_price else 'null',
-    'current_price' : yahoo_finance_quote.current_price if yahoo_finance_quote.current_price else 'null'
+    'current_price' : yahoo_finance_quote.current_price if yahoo_finance_quote and yahoo_finance_quote.current_price else 'null'
   }
   return render_template('json/big_five_numbers.json', **template_values)
 
