@@ -83,6 +83,8 @@ $(document).ready(function() {
       if (marginOfSafety) {
         let range = [marginOfSafety, marginOfSafety * 1.25, marginOfSafety * 1.5]
         colorCellWithIDForZeroBasedRange('#current_price', range);
+      } else {
+        colorCellWithBackgroundColor('#current_price', Color.red());
       }
     });
   });
@@ -126,6 +128,10 @@ function updateBigFiveHtmlWithDataForKey(data, key) {
   }
 }
 
+function colorCellWithBackgroundColor(id, backgroundColor) {
+    $(id).css('background-color', backgroundColor);
+}
+
 function colorCellWithIDForRange(id, range) {
     if (range.length != 3) {
       return;
@@ -139,7 +145,7 @@ function colorCellWithIDForRange(id, range) {
     } else if (value >= range[0]) {
       backgroundColor = Color.orange();
     }
-    $(id).css('background-color', backgroundColor);
+    colorCellWithBackgroundColor(id, backgroundColor);
 }
 
 function colorCellWithIDForZeroBasedRange(id, range) {
@@ -149,7 +155,7 @@ function colorCellWithIDForZeroBasedRange(id, range) {
     value = $(id).html();
     if (value == -1) {
       $(id).text('-');
-      $(id).css('background-color', Color.white());
+      colorCellWithBackgroundColor(id, Color.white());
       return;
     }
 
@@ -162,5 +168,5 @@ function colorCellWithIDForZeroBasedRange(id, range) {
       backgroundColor = Color.yellow();
     }
 
-    $(id).css('background-color', backgroundColor);
+    colorCellWithBackgroundColor(id, backgroundColor);
 }
