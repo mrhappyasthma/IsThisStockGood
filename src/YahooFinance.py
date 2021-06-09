@@ -15,8 +15,8 @@ class YahooFinanceQuote:
     return YahooFinanceQuote.URL_TEMPLATE.format(ticker_symbol)
 
   def __init__(self, ticker_symbol):
-    self.ticker_symbol = ticker_symbol
-    self.url = YahooFinanceQuote._construct_url(ticker_symbol)
+    self.ticker_symbol = ticker_symbol.replace('.', '-')
+    self.url = YahooFinanceQuote._construct_url(self.ticker_symbol)
     self.current_price = None
 
   def parse_current_price(self, content):
@@ -52,8 +52,8 @@ class YahooFinanceAnalysis:
       return None
 
   def __init__(self, ticker_symbol):
-    self.ticker_symbol = ticker_symbol
-    self.url = YahooFinanceAnalysis._construct_url(ticker_symbol)
+    self.ticker_symbol = ticker_symbol.replace('.', '-')
+    self.url = YahooFinanceAnalysis._construct_url(self.ticker_symbol)
     self.five_year_growth_rate = None
 
   def parse_analyst_five_year_growth_rate(self, content):

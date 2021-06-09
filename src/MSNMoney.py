@@ -21,10 +21,10 @@ class MSNMoney:
     return url
 
   def __init__(self, ticker_symbol):
-    self.ticker_symbol = ticker_symbol
+    self.ticker_symbol = ticker_symbol.replace('.', '')
     self.pe_high = None
     self.pe_low = None
-    self.url = MSNMoney.construct_url(ticker_symbol)
+    self.url = MSNMoney.construct_url(self.ticker_symbol)
 
   def nextFloatFromIterator(self, iterator):
     node = None
