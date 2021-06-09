@@ -27,9 +27,6 @@ $(document).ready(function() {
     // Stop form from submitting normally.
     event.preventDefault();
 
-    // Reset all cells
-    resetAllCells();
-
     // Extract the URL path for the action.
     let $form = $(this);
     path = $form.attr('action');
@@ -89,10 +86,6 @@ $(document).ready(function() {
     });
   });
 });
-
-function resetAllCells() {
-
-}
 
 function updateHtmlWithValueForKey(data, key, commas) {
   value = data[key];
