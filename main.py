@@ -15,6 +15,11 @@ from src.YahooFinance import YahooFinanceQuote
 app = Flask(__name__)
 
 def jsonpToCSV(s):
+  # Handle a weird edge case where morningstar may return
+  # the string '{"componentData":null}'
+  if s == '{"componentData":null}':
+    return ''
+
   arr = []
   ignore = False
   printing = False
