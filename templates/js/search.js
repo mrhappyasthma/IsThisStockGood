@@ -89,7 +89,7 @@ $(document).ready(function() {
 
 function updateHtmlWithValueForKey(data, key, commas) {
   value = data[key];
-  if (!value) {
+  if (value === null) {
     $('#' + key).html('Undefined');
     return;
   }
