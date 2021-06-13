@@ -4,6 +4,7 @@ from src.Morningstar import MorningstarRatios
 from src.MSNMoney import MSNMoney
 from src.YahooFinance import YahooFinanceAnalysis
 from src.YahooFinance import YahooFinanceQuote
+from src.YahooFinance import YahooFinanceQuoteSummary, YahooFinanceQuoteSummaryModule
 
 def fetchDataForTickerSymbol(ticker):
   """Fetches and parses all of the financial data for the `ticker`.
@@ -41,6 +42,7 @@ def fetchDataForTickerSymbol(ticker):
   data_fetcher.fetch_pe_ratios()
   data_fetcher.fetch_yahoo_finance_analysis()
   data_fetcher.fetch_yahoo_finance_quote()
+  data_fetcher.fetch_yahoo_finance_quote_summary()
 
   # Wait for each RPC result before proceeding.
   for rpc in data_fetcher.rpcs:
@@ -159,6 +161,7 @@ class DataFetcher():
     self.pe_ratios = None
     self.yahoo_finance_analysis = None
     self.yahoo_finance_quote = None
+    self.yahoo_finance_quote_summary = None
     self.error = False
 
 
@@ -254,3 +257,24 @@ class DataFetcher():
     success = self.yahoo_finance_quote.parse_quote(result)
     if not success:
       self.yahoo_finance_quote = None
+
+  def fetch_yahoo_finance_quote_summary(self):
+    modules = [YahooFinanceQuoteSummaryModule.assetProfile]
+    self.yahoo_finance_quote_summary = YahooFinanceQuoteSummary(self.ticker_symbol, modules)
+    session = FuturesSession()
+    rpc = session.get(self.yahoo_finance_quote_summary.url, allow_redirects=True, hooks={
+       'response': self.parse_yahoo_finance_quote_summary,
+    })
+    self.rpcs.append(rpc)
+
+  # Called asynchronously upon completion of the URL fetch from
+  # `fetch_yahoo_finance_quote_summary`.
+  def parse_yahoo_finance_quote_summary(self, response, *args, **kwargs):
+    if response.status_code != 200:
+      return
+    if not self.yahoo_finance_quote_summary:
+      return
+    result = response.text
+    success = self.yahoo_finance_quote_summary.parse_modules(result)
+    if not success:
+      self.yahoo_finance_quote_summary = None

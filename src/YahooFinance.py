@@ -1,3 +1,4 @@
+from enum import Enum
 import json
 import logging
 import re
@@ -87,61 +88,102 @@ class YahooFinanceAnalysis:
     return True if self.five_year_growth_rate else False
 
 
+class YahooFinanceQuoteSummaryModule(Enum):
+    assetProfile = 1
+    incomeStatementHistory = 2
+    incomeStatementHistoryQuarterly = 3
+    balanceSheetHistory = 4
+    balanceSheetHistoryQuarterly = 5
+    cashFlowStatementHistory = 6
+    cashFlowStatementHistoryQuarterly = 7
+    defaultKeyStatistics = 8
+    financialData = 9
+    calendarEvents = 10
+    secFilings = 11
+    recommendationTrend = 12
+    upgradeDowngradeHistory = 13
+    institutionOwnership = 14
+    fundOwnership = 15
+    majorDirectHolders = 16,
+    majorHoldersBreakdown = 17
+    insiderTransactions = 18
+    insiderHolders = 19
+    netSharePurchaseActivity = 20
+    earnings = 21
+    earningsHistory = 22
+    earningsTrend = 23
+    industryTrend = 24
+    indexTrend = 26
+    sectorTrend = 27
+
+
 ## (unofficial) API documentation: https://observablehq.com/@stroked/yahoofinance
 class YahooFinanceQuoteSummary:
   # Expects the ticker symbol as the first format string, and a comma-separated list
   # of `QuotesummaryModules` strings for the second argument.
-  URL_TEMPLATE = 'https://query1.finance.yahoo.com/v10/finance/quoteSummary/{}?modules={}'
+  _URL_TEMPLATE = 'https://query1.finance.yahoo.com/v10/finance/quoteSummary/{}?modules={}'
 
   # A list of modules that can be used inside of `QUOTE_SUMMARY_URL_TEMPLATE`.
   # These should be passed as a comma-separated list.
-  MODULES = {
-    "assetProfile": "assetProfile",  # Company info/background
-    "incomeStatementHistory": "incomeStatementHistory",
-    "incomeStatementHistoryQuarterly": "incomeStatementHistoryQuarterly",
-    "balanceSheetHistory": "balanceSheetHistory",  # Current cash/equivalents
-    "balanceSheetHistoryQuarterly": "balanceSheetHistoryQuarterly",
-    "cashFlowStatementHistory": "cashFlowStatementHistory",
-    "cashFlowStatementHistoryQuarterly": "cashFlowStatementHistoryQuarterly",
-    "defaultKeyStatistics": "defaultKeyStatistics",
-    "financialData": "financialData",
-    "calendarEvents": "calendarEvents",  # Contains ex-dividend date
-    "secFilings": "secFilings",  # SEC filing links
-    "recommendationTrend": "recommendationTrend",
-    "upgradeDowngradeHistory": "upgradeDowngradeHistory",
-    "institutionOwnership": "institutionOwnership",
-    "fundOwnership": "fundOwnership",
-    "majorDirectHolders": "majorDirectHolders",
-    "majorHoldersBreakdown": "majorHoldersBreakdown",
-    "insiderTransactions": "insiderTransactions",
-    "insiderHolders": "insiderHolders",
-    "netSharePurchaseActivity": "netSharePurchaseActivity",
-    "netSharePurchaseActivity": "earnings",
-    "earningsHistory": "earningsHistory",
-    "earningsTrend": "earningsTrend",
-    "industryTrend": "industryTrend",
-    "indexTrend": "indexTrend",
-    "sectorTrend": "sectorTrend"
+  _MODULES = {
+    YahooFinanceQuoteSummaryModule.assetProfile: "assetProfile",  # Company info/background
+    YahooFinanceQuoteSummaryModule.incomeStatementHistory: "incomeStatementHistory",
+    YahooFinanceQuoteSummaryModule.incomeStatementHistoryQuarterly: "incomeStatementHistoryQuarterly",
+    YahooFinanceQuoteSummaryModule.balanceSheetHistory: "balanceSheetHistory",  # Current cash/equivalents
+    YahooFinanceQuoteSummaryModule.balanceSheetHistoryQuarterly: "balanceSheetHistoryQuarterly",
+    YahooFinanceQuoteSummaryModule.cashFlowStatementHistory: "cashFlowStatementHistory",
+    YahooFinanceQuoteSummaryModule.cashFlowStatementHistoryQuarterly: "cashFlowStatementHistoryQuarterly",
+    YahooFinanceQuoteSummaryModule.defaultKeyStatistics: "defaultKeyStatistics",
+    YahooFinanceQuoteSummaryModule.financialData: "financialData",
+    YahooFinanceQuoteSummaryModule.calendarEvents: "calendarEvents",  # Contains ex-dividend date
+    YahooFinanceQuoteSummaryModule.secFilings: "secFilings",  # SEC filing links
+    YahooFinanceQuoteSummaryModule.recommendationTrend: "recommendationTrend",
+    YahooFinanceQuoteSummaryModule.upgradeDowngradeHistory: "upgradeDowngradeHistory",
+    YahooFinanceQuoteSummaryModule.institutionOwnership: "institutionOwnership",
+    YahooFinanceQuoteSummaryModule.fundOwnership: "fundOwnership",
+    YahooFinanceQuoteSummaryModule.majorDirectHolders: "majorDirectHolders",
+    YahooFinanceQuoteSummaryModule.majorHoldersBreakdown: "majorHoldersBreakdown",
+    YahooFinanceQuoteSummaryModule.insiderTransactions: "insiderTransactions",
+    YahooFinanceQuoteSummaryModule.insiderHolders: "insiderHolders",
+    YahooFinanceQuoteSummaryModule.netSharePurchaseActivity: "netSharePurchaseActivity",
+    YahooFinanceQuoteSummaryModule.earnings: "earnings",
+    YahooFinanceQuoteSummaryModule.earningsHistory: "earningsHistory",
+    YahooFinanceQuoteSummaryModule.earningsTrend: "earningsTrend",
+    YahooFinanceQuoteSummaryModule.industryTrend: "industryTrend",
+    YahooFinanceQuoteSummaryModule.indexTrend: "indexTrend",
+    YahooFinanceQuoteSummaryModule.sectorTrend: "sectorTrend"
   }
 
   @classmethod
   def _construct_url(cls, ticker_symbol, modules):
     modulesString = cls._construct_modules_string(modules)
-    return cls.URL_TEMPLATE.format(ticker_symbol, modulesString)
+    return cls._URL_TEMPLATE.format(ticker_symbol, modulesString)
 
   # A helper method to return a formatted modules string.
   @classmethod
   def _construct_modules_string(cls, modules):
     modulesString = modules[0]
-    for index, module in enumerate(modules, start=1):
+    for module in modules[1:]:
       modulesString = modulesString + ',' + module
     return modulesString
 
   # Accepts the ticker symbol followed by a list of
-  # `YahooFinanceQuoteSummary.MODULES`.
+  # `YahooFinanceQuoteSummaryModule` enum values.
   def __init__(self, ticker_symbol, modules):
     self.ticker_symbol = ticker_symbol
-    self.modules = modules
-    self.url = YahooFinanceQuote._construct_url(ticker_symbol, modules)
+    self.modules = [self._MODULES[module] for module in modules]
+    self.url = YahooFinanceQuoteSummary._construct_url(ticker_symbol, self.modules)
+    self.module_data = {}
 
-  ## TODO: Add parsing for relevant modules.
+  def parse_modules(self, content):
+    """Parses all the of the module responses from the json into a top-level dictionary."""
+    data = json.loads(content)
+    results = data.get('quoteSummary', {}).get('result', None)
+    if not results:
+      logging.error('Could not parse response for url: ' + self.url)
+      return
+    for module in self.modules:
+      for result in results:
+        if module in result:
+          self.module_data[module] = result[module]
+          break
