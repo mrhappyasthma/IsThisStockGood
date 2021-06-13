@@ -54,7 +54,7 @@ def fetchDataForTickerSymbol(ticker):
   yahoo_finance_quote = data_fetcher.yahoo_finance_quote
   if not ratios:
     return None
-  margin_of_safety_price = _calculateMarginOfSafetyPrice(ratios, pe_ratios, yahoo_finance_analysis)
+  margin_of_safety_price, sticker_price = _calculateMarginOfSafetyPrice(ratios, pe_ratios, yahoo_finance_analysis)
   payback_time = _calculatePaybackTime(ratios, yahoo_finance_quote, yahoo_finance_analysis)
   template_values = {
     'roic': ratios.roic_averages if ratios.roic_averages else [],
@@ -69,6 +69,7 @@ def fetchDataForTickerSymbol(ticker):
     'ttm_net_income' : ratios.ttm_net_income if ratios.ttm_net_income else 'null',
     'margin_of_safety_price' : margin_of_safety_price if margin_of_safety_price else 'null',
     'current_price' : yahoo_finance_quote.current_price if yahoo_finance_quote and yahoo_finance_quote.current_price else 'null',
+    'sticker_price' : sticker_price if sticker_price else 'null',
     'payback_time' : payback_time if payback_time else 'null'
   }
   return template_values
@@ -114,20 +115,21 @@ def _jsonpToCSV(s):
 
 def _calculateMarginOfSafetyPrice(ratios, pe_ratios, yahoo_finance_analysis):
   if not ratios or not pe_ratios or not yahoo_finance_analysis:
-    return None
+    return None, None
 
   if not yahoo_finance_analysis.five_year_growth_rate or not ratios.equity_growth_rates:
-    return None
+    return None, None
   growth_rate = min(float(yahoo_finance_analysis.five_year_growth_rate),
                     float(ratios.equity_growth_rates[-1]))
   # Divide the growth rate by 100 to convert from percent to decimal.
   growth_rate = growth_rate / 100.0
 
   if not ratios.ttm_eps or not pe_ratios.pe_low or not pe_ratios.pe_high:
-    return None
-  margin_of_safety_price = RuleOne.margin_of_safety_price(float(ratios.ttm_eps), growth_rate,
-                                                          float(pe_ratios.pe_low), float(pe_ratios.pe_high))
-  return margin_of_safety_price
+    return None, None
+  margin_of_safety_price, sticker_price = \
+      RuleOne.margin_of_safety_price(float(ratios.ttm_eps), growth_rate,
+                                     float(pe_ratios.pe_low), float(pe_ratios.pe_high))
+  return margin_of_safety_price, sticker_price
 
 
 def _calculatePaybackTime(ratios, yahoo_finance_quote, yahoo_finance_analysis):

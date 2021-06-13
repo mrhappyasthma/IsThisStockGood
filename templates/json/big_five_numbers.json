@@ -11,5 +11,6 @@
   "ttm_net_income" : {{ ttm_net_income }},
   "margin_of_safety_price" : {{ margin_of_safety_price }},
   "current_price" : {{ current_price }},
+  "sticker_price" : {{ sticker_price }},
   "payback_time" : {{ payback_time }}
 }

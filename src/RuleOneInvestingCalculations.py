@@ -124,7 +124,10 @@ def margin_of_safety_price(current_eps, estimated_growth_rate,
         Usually found on MSN Money.
 
   Returns:
-    The maximum price to buy the stock for with a 50% margin of safety.
+     1. The maximum price to buy the stock for with a 50% margin of safety.
+     2. The sticker price, which is the estimated fair-value price today. This
+        value can be used to determine when is a good time to exit a position
+        after a big run-up in price.
   """
   if not current_eps or not estimated_growth_rate or not historical_low_pe or not historical_high_pe:
     return None
@@ -134,7 +137,7 @@ def margin_of_safety_price(current_eps, estimated_growth_rate,
   future_price = calculate_estimated_future_price(future_eps, future_pe)
   sticker_price = calculate_sticker_price(future_price)
   margin_of_safety = calculate_margin_of_safety(sticker_price)
-  return margin_of_safety
+  return margin_of_safety, sticker_price
 
 
 def calculate_future_eps(current_eps, estimated_growth_rate, time_horizon=10):
