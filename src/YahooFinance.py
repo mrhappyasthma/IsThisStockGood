@@ -19,6 +19,7 @@ class YahooFinanceQuote:
     self.url = YahooFinanceQuote._construct_url(self.ticker_symbol)
     self.current_price = None
     self.market_cap = None
+    self.name = None
 
   def parse_quote(self, content):
     data = json.loads(content)
@@ -27,6 +28,7 @@ class YahooFinanceQuote:
       return False
     success = self._parse_current_price(results)
     success = success and self._parse_market_cap(results)
+    success = success and self._parse_name(results)
     return success
 
   def _parse_current_price(self, results):
@@ -38,6 +40,11 @@ class YahooFinanceQuote:
     if results:
       self.market_cap = results[0].get('marketCap', None)
     return True if self.market_cap else False
+
+  def _parse_name(self, results):
+    if results:
+      self.name = results[0].get('longName', None)
+    return True if self.name else False
 
 
 class YahooFinanceAnalysis:

@@ -57,6 +57,8 @@ def fetchDataForTickerSymbol(ticker):
   margin_of_safety_price, sticker_price = _calculateMarginOfSafetyPrice(ratios, pe_ratios, yahoo_finance_analysis)
   payback_time = _calculatePaybackTime(ratios, yahoo_finance_quote, yahoo_finance_analysis)
   template_values = {
+    'ticker' : ticker,
+    'name' : yahoo_finance_quote.name if yahoo_finance_quote and yahoo_finance_quote.name else 'null',
     'roic': ratios.roic_averages if ratios.roic_averages else [],
     'eps': ratios.eps_growth_rate_averages if ratios.eps_growth_rate_averages else [],
     'sales': ratios.sales_growth_rate_averages if ratios.sales_growth_rate_averages else [],
