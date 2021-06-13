@@ -229,6 +229,6 @@ class DataFetcher():
     if not self.yahoo_finance_quote:
       return
     result = response.text
-    success = self.yahoo_finance_quote.parse_current_price(result)
+    success = self.yahoo_finance_quote.parse_quote(result)
     if not success:
       self.yahoo_finance_quote = None

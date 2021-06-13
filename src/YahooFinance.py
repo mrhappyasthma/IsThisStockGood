@@ -18,13 +18,26 @@ class YahooFinanceQuote:
     self.ticker_symbol = ticker_symbol.replace('.', '-')
     self.url = YahooFinanceQuote._construct_url(self.ticker_symbol)
     self.current_price = None
+    self.market_cap = None
 
-  def parse_current_price(self, content):
+  def parse_quote(self, content):
     data = json.loads(content)
     results = data.get('quoteResponse', {}).get('result', [])
+    if not results:
+      return False
+    success = self._parse_current_price(results)
+    success = success and self._parse_market_cap(results)
+    return success
+
+  def _parse_current_price(self, results):
     if results:
       self.current_price = results[0].get('regularMarketPrice', None)
     return True if self.current_price else False
+
+  def _parse_market_cap(self, results):
+    if results:
+      self.market_cap = results[0].get('marketCap', None)
+    return True if self.market_cap else False
 
 
 class YahooFinanceAnalysis:
