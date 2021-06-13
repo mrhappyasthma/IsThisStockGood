@@ -4,6 +4,7 @@
 
 This website attempts to automate much of the calculations described in Phil Town's
 [Rule #1](https://www.amazon.com/gp/product/0307336840?pf_rd_p=c2945051-950f-485c-b4df-15aac5223b10&pf_rd_r=WVNPVWRWTJ9E0QSDGWTH) investing book.
+(As well as his second book, [Payback Time](https://www.amazon.com/Payback-Time-Outsmarting-Getting-Investments/dp/1847940641/).)
 
 To use the website, simply enter in a stock ticker symbol and let this site do its magic.
 
