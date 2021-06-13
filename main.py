@@ -28,7 +28,7 @@ def search():
   template_values = fetchDataForTickerSymbol(ticker)
   if not template_values:
     return render_template('json/error.json', **{'error' : 'Invalid ticker symbol'})
-  return render_template('json/big_five_numbers.json', **template_values)
+  return render_template('json/stock_data.json', **template_values)
 
 
 if __name__ == '__main__':
