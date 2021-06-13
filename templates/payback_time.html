@@ -1,0 +1,25 @@
+<div class="container pb-2 pt-2" id="Market Cap">
+  <div class="row justify-content-center">
+    <button
+        type="button"
+        class="btn btn-raised btn-lg btn-primary"
+        data-toggle="popover"
+        title="Payback Time"
+        data-content="{% include 'txt/payback_time_tooltip.txt' %}"
+    >Payback Time</button>
+  </div>
+
+    <div class="row pt-3 justify-content-center">
+    <div class="col-sm-6">
+      <table class="table table-bordered text-center">
+        <tr id="debt_equity_title_label">
+          <thead class="thead-light">
+            <th>Payback Time (years)</th>
+          </thead>
+          <td id="payback_time">
+            -
+          </td>
+        </tr>
+      </table>
+    </div>
+</div>

@@ -89,6 +89,11 @@ $(document).ready(function() {
       } else {
         colorCellWithBackgroundColor('#current_price', Color.red());
       }
+
+      // Update Payback Time section
+      let paybackTime = data['payback_time']
+      $('#payback_time').html(paybackTime)
+      colorCellWithIDForZeroBasedRange('#payback_time', [6, 8, 10]);
     });
   });
 });

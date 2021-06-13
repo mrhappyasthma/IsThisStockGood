@@ -1,0 +1,5 @@
+In Phil Town's 'Payback Time', he describes a method for projecting the number of years required
+for the business's earnings (i.e. net income) to justify the current share price, factoring in
+its expected growth rate. According to Phil Town, the goal is for a payback time less than 8 years,
+which reflects roughly what private equity investments aim for (9% rate of return per year). A
+payback time less than 6 is considered very good. A payback time of 8 years or less, is solid.
