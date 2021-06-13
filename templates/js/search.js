@@ -52,6 +52,12 @@ $(document).ready(function() {
         return;
       }
 
+      // Update website title with the latest ticker symbol
+      if (data.ticker) {
+        let baseWebsiteTitle = document.title.split('?')[0] + '?';
+        document.title = baseWebsiteTitle + ' - ' + data.ticker.toUpperCase();
+      }
+
       // Update moat numbers.
       updateBigFiveHtmlWithDataForKey(data, 'eps');
       updateBigFiveHtmlWithDataForKey(data, 'sales');
