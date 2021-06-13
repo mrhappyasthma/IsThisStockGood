@@ -55,6 +55,7 @@ def fetchDataForTickerSymbol(ticker):
   if not ratios:
     return None
   margin_of_safety_price = _calculateMarginOfSafetyPrice(ratios, pe_ratios, yahoo_finance_analysis)
+  payback_time = _calculatePaybackTime(ratios, yahoo_finance_quote, yahoo_finance_analysis)
   template_values = {
     'roic': ratios.roic_averages if ratios.roic_averages else [],
     'eps': ratios.eps_growth_rate_averages if ratios.eps_growth_rate_averages else [],
@@ -67,7 +68,8 @@ def fetchDataForTickerSymbol(ticker):
     'debt_equity_ratio' : ratios.debt_equity_ratio if ratios.debt_equity_ratio >= 0 else -1,
     'ttm_net_income' : ratios.ttm_net_income if ratios.ttm_net_income else 'null',
     'margin_of_safety_price' : margin_of_safety_price if margin_of_safety_price else 'null',
-    'current_price' : yahoo_finance_quote.current_price if yahoo_finance_quote and yahoo_finance_quote.current_price else 'null'
+    'current_price' : yahoo_finance_quote.current_price if yahoo_finance_quote and yahoo_finance_quote.current_price else 'null',
+    'payback_time' : payback_time if payback_time else 'null'
   }
   return template_values
 
@@ -126,6 +128,23 @@ def _calculateMarginOfSafetyPrice(ratios, pe_ratios, yahoo_finance_analysis):
   margin_of_safety_price = RuleOne.margin_of_safety_price(float(ratios.ttm_eps), growth_rate,
                                                           float(pe_ratios.pe_low), float(pe_ratios.pe_high))
   return margin_of_safety_price
+
+
+def _calculatePaybackTime(ratios, yahoo_finance_quote, yahoo_finance_analysis):
+  if not ratios or not yahoo_finance_quote or not yahoo_finance_analysis:
+    return None
+
+  if not yahoo_finance_analysis.five_year_growth_rate or not ratios.equity_growth_rates:
+    return None
+  growth_rate = min(float(yahoo_finance_analysis.five_year_growth_rate),
+                    float(ratios.equity_growth_rates[-1]))
+  # Divide the growth rate by 100 to convert from percent to decimal.
+  growth_rate = growth_rate / 100.0
+
+  if not ratios.ttm_net_income or not yahoo_finance_quote.market_cap:
+    return None
+  payback_time = RuleOne.payback_time(yahoo_finance_quote.market_cap, ratios.ttm_net_income, growth_rate)
+  return payback_time
 
 
 class DataFetcher():

@@ -10,5 +10,6 @@
   "debt_equity_ratio" : {{ debt_equity_ratio }},
   "ttm_net_income" : {{ ttm_net_income }},
   "margin_of_safety_price" : {{ margin_of_safety_price }},
-  "current_price" : {{ current_price }}
+  "current_price" : {{ current_price }},
+  "payback_time" : {{ payback_time }}
 }
