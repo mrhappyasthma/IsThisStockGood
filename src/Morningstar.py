@@ -58,12 +58,12 @@ class MorningstarRatios:
       if not self.free_cash_flow:
         logging.error('Failed to parse Free Cash Flow.')
       else:
-        self.recent_free_cash_flow = self.free_cash_flow[-1] * 1000000
+        self.recent_free_cash_flow = self.free_cash_flow[-1] * 1000000 # In USD millions
       net_income = extract_float_data_for_key(self.finance_data, 'Net Income USD Mil', include_ttm=True)
       if not net_income:
         logging.error('Failed to parse Net Income')
       else:
-        self.ttm_net_income = net_income[-1]
+        self.ttm_net_income = net_income[-1] * 1000000  # In USD millions
       eps = extract_float_data_for_key(self.finance_data, 'Earnings Per Share USD', include_ttm=True)
       if not eps:
         logging.error('Failed to parse Earnings Per Share from finances')
