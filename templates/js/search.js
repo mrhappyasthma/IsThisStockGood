@@ -34,7 +34,7 @@ $(document).ready(function() {
     // Extract the ticker symbol.
     let $ticker = $('#ticker').val();
     if ($ticker.length == 0) {
-      return
+      return;
     }
 
     // Post the data to the path.
@@ -66,10 +66,10 @@ $(document).ready(function() {
       updateBigFiveHtmlWithDataForKey(data, 'cash');
 
       // Update management numbers.
-      updateHtmlWithValueForKey(data, 'debt_equity_ratio', /*commas=*/true)
+      updateHtmlWithValueForKey(data, 'debt_equity_ratio', /*commas=*/true);
       colorCellWithIDForZeroBasedRange('#debt_equity_ratio', [1, 2, 3]);
-      updateHtmlWithValueForKey(data, 'long_term_debt', /*commas=*/true)
-      updateHtmlWithValueForKey(data, 'free_cash_flow', /*commas=*/true)
+      updateHtmlWithValueForKey(data, 'long_term_debt', /*commas=*/true);
+      updateHtmlWithValueForKey(data, 'free_cash_flow', /*commas=*/true);
       let cash_flow = $('#free_cash_flow').html();
       if (parseInt(cash_flow) >= 0) {
         updateHtmlWithValueForKey(data, 'debt_payoff_time', /*commas=*/false);
@@ -80,10 +80,10 @@ $(document).ready(function() {
       }
 
       // Update margin of safety numbers
-      updateHtmlWithValueForKey(data, 'margin_of_safety_price', /*commas=*/false)
-      updateHtmlWithValueForKey(data, 'current_price', /*commas=*/false)
-      updateHtmlWithValueForKey(data, 'sticker_price', /*commas=*/false)
-      let marginOfSafety = data['margin_of_safety_price']
+      updateHtmlWithValueForKey(data, 'margin_of_safety_price', /*commas=*/false);
+      updateHtmlWithValueForKey(data, 'current_price', /*commas=*/false);
+      updateHtmlWithValueForKey(data, 'sticker_price', /*commas=*/false);
+      let marginOfSafety = data['margin_of_safety_price'];
       if (marginOfSafety) {
         let range = [marginOfSafety, marginOfSafety * 1.25, marginOfSafety * 1.5]
         colorCellWithIDForZeroBasedRange('#current_price', range);
@@ -93,7 +93,7 @@ $(document).ready(function() {
 
       // Update Payback Time section
       let paybackTime = data['payback_time'];
-      let paybackTimeID = '#payback_time'
+      let paybackTimeID = '#payback_time';
       if (paybackTime) {
         $(paybackTimeID).html(paybackTime);
         colorCellWithIDForZeroBasedRange(paybackTimeID, [6, 8, 10]);
@@ -131,7 +131,7 @@ function updateBigFiveHtmlWithDataForKey(data, key) {
     $(element_id).html(value);
 
     if (value == '-') {
-      color = (i == 0) ? Color.red() :  Color.white()
+      color = (i == 0) ? Color.red() :  Color.white();
       $(element_id).css('background-color', color);
     } else {
       colorCellWithIDForRange(element_id, [0, 5, 10], true);
