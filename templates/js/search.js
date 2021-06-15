@@ -92,14 +92,11 @@ $(document).ready(function() {
       }
 
       // Update Payback Time section
-      let paybackTime = data['payback_time'];
-      let paybackTimeID = '#payback_time';
-      if (paybackTime) {
-        $(paybackTimeID).html(paybackTime);
-        colorCellWithIDForZeroBasedRange(paybackTimeID, [6, 8, 10]);
-      } else {
-        $(paybackTimeID).html('Undefined');
-        colorCellWithBackgroundColor(paybackTimeID, Color.red());
+      let key = 'payback_time';
+      updateHtmlWithValueForKey(data, key, /*commas=*/true);
+      colorCellWithIDForZeroBasedRange('#' + key, [6, 8, 10]);
+      if (!data[key]) {
+        colorCellWithBackgroundColor('#' + key, Color.red());
       }
 
       // Update Market Cap numbers
