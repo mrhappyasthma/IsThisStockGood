@@ -73,7 +73,8 @@ def fetchDataForTickerSymbol(ticker):
     'margin_of_safety_price' : margin_of_safety_price if margin_of_safety_price else 'null',
     'current_price' : yahoo_finance_quote.current_price if yahoo_finance_quote and yahoo_finance_quote.current_price else 'null',
     'sticker_price' : sticker_price if sticker_price else 'null',
-    'payback_time' : payback_time if payback_time else 'null'
+    'payback_time' : payback_time if payback_time else 'null',
+    'average_volume' : yahoo_finance_quote.average_volume if yahoo_finance_quote and yahoo_finance_quote.average_volume else 'null'
   }
   return template_values
 

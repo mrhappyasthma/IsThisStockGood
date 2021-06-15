@@ -101,6 +101,15 @@ $(document).ready(function() {
         $(paybackTimeID).html('Undefined');
         colorCellWithBackgroundColor(paybackTimeID, Color.red());
       }
+
+      // Update Market Cap numbers
+      updateHtmlWithValueForKey(data, 'average_volume', /*commas=*/true);
+      let averageVolume = data['average_volume'];
+      let minVolume = data['current_price'] <= 1.0 ? 1000000 : 500000;
+      let averageVolumeColor = averageVolume >= minVolume ? Color.green() : Color.red();
+      colorCellWithBackgroundColor('#average_volume', averageVolumeColor);
+      let sharesToHold = Math.round(averageVolume * 0.01).toLocaleString('en', {useGrouping:true});
+      $('#shares_to_hold').html(sharesToHold);  // 1% of volume
     });
   });
 });
