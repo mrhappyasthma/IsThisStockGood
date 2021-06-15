@@ -92,9 +92,15 @@ $(document).ready(function() {
       }
 
       // Update Payback Time section
-      let paybackTime = data['payback_time']
-      $('#payback_time').html(paybackTime)
-      colorCellWithIDForZeroBasedRange('#payback_time', [6, 8, 10]);
+      let paybackTime = data['payback_time'];
+      let paybackTimeID = '#payback_time'
+      if (paybackTime) {
+        $(paybackTimeID).html(paybackTime);
+        colorCellWithIDForZeroBasedRange(paybackTimeID, [6, 8, 10]);
+      } else {
+        $(paybackTimeID).html('Undefined');
+        colorCellWithBackgroundColor(paybackTimeID, Color.red());
+      }
     });
   });
 });
