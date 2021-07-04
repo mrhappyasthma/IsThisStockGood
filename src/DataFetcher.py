@@ -1,3 +1,4 @@
+import random
 import src.RuleOneInvestingCalculations as RuleOne
 from requests_futures.sessions import FuturesSession
 from src.Morningstar import MorningstarRatios
@@ -155,6 +156,15 @@ def _calculatePaybackTime(ratios, yahoo_finance_quote, yahoo_finance_analysis):
 
 class DataFetcher():
   """A helper class that syncronizes all of the async data fetches."""
+
+  USER_AGENT_LIST = [
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+  ]
+
   def __init__(self,):
     self.rpcs = []
     self.ticker_symbol = ''
@@ -165,10 +175,16 @@ class DataFetcher():
     self.yahoo_finance_quote_summary = None
     self.error = False
 
+  def _create_session(self):
+    session = FuturesSession()
+    session.headers.update({
+      'User-Agent' : random.choice(DataFetcher.USER_AGENT_LIST)
+    })
+    return session
 
   def fetch_morningstar_ratios(self):
     self.ratios = MorningstarRatios(self.ticker_symbol)
-    session = FuturesSession()
+    session = self._create_session()
     key_stat_rpc = session.get(self.ratios.key_stat_url, hooks={
        'response': self.parse_morningstar_ratios,
     })
@@ -201,7 +217,7 @@ class DataFetcher():
 
   def fetch_pe_ratios(self):
     self.pe_ratios = MSNMoney(self.ticker_symbol)
-    session = FuturesSession()
+    session = self._create_session()
     rpc = session.get(self.pe_ratios.url, allow_redirects=True, hooks={
        'response': self.parse_pe_ratios,
     })
@@ -221,7 +237,7 @@ class DataFetcher():
 
   def fetch_yahoo_finance_analysis(self):
     self.yahoo_finance_analysis = YahooFinanceAnalysis(self.ticker_symbol)
-    session = FuturesSession()
+    session = self._create_session()
     rpc = session.get(self.yahoo_finance_analysis.url, allow_redirects=True, hooks={
        'response': self.parse_yahoo_finance_analysis,
     })
@@ -241,7 +257,7 @@ class DataFetcher():
 
   def fetch_yahoo_finance_quote(self):
     self.yahoo_finance_quote = YahooFinanceQuote(self.ticker_symbol)
-    session = FuturesSession()
+    session = self._create_session()
     rpc = session.get(self.yahoo_finance_quote.url, allow_redirects=True, hooks={
        'response': self.parse_yahoo_finance_quote,
     })
@@ -262,7 +278,7 @@ class DataFetcher():
   def fetch_yahoo_finance_quote_summary(self):
     modules = [YahooFinanceQuoteSummaryModule.assetProfile]
     self.yahoo_finance_quote_summary = YahooFinanceQuoteSummary(self.ticker_symbol, modules)
-    session = FuturesSession()
+    session = self._create_session()
     rpc = session.get(self.yahoo_finance_quote_summary.url, allow_redirects=True, hooks={
        'response': self.parse_yahoo_finance_quote_summary,
     })
