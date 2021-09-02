@@ -130,7 +130,7 @@ def margin_of_safety_price(current_eps, estimated_growth_rate,
         after a big run-up in price.
   """
   if not current_eps or not estimated_growth_rate or not historical_low_pe or not historical_high_pe:
-    return None
+    return None, None
   future_eps = calculate_future_eps(current_eps, estimated_growth_rate)
   future_pe = calculate_future_pe(estimated_growth_rate, historical_low_pe,
                                   historical_high_pe)
