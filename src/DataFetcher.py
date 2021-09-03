@@ -6,6 +6,7 @@ from src.MSNMoney import MSNMoney
 from src.YahooFinance import YahooFinanceAnalysis
 from src.YahooFinance import YahooFinanceQuote
 from src.YahooFinance import YahooFinanceQuoteSummary, YahooFinanceQuoteSummaryModule
+from threading import Lock
 
 def fetchDataForTickerSymbol(ticker):
   """Fetches and parses all of the financial data for the `ticker`.
@@ -166,6 +167,7 @@ class DataFetcher():
   ]
 
   def __init__(self,):
+    self.lock = Lock()
     self.rpcs = []
     self.ticker_symbol = ''
     self.ratios = None
@@ -198,22 +200,28 @@ class DataFetcher():
   # Called asynchronously upon completion of the URL fetch from
   # `fetch_morningstar_ratios`.
   def parse_morningstar_finances(self, response, *args, **kwargs):
+    self.lock.acquire()
     if not self.ratios:
+      self.lock.release()
       return
     parsed_content = _jsonpToCSV(response.text)
     success = self.ratios.parse_finances(parsed_content.split('\n'))
     if not success:
       self.ratios = None
+    self.lock.release()
 
   # Called asynchronously upon completion of the URL fetch from
   # `fetch_morningstar_ratios`.
   def parse_morningstar_ratios(self, response, *args, **kwargs):
+    self.lock.acquire()
     if not self.ratios:
+      self.lock.release()
       return
     parsed_content = _jsonpToCSV(response.text)
     success = self.ratios.parse_ratios(parsed_content.split('\n'))
     if not success:
       self.ratios = None
+    self.lock.release()
 
   def fetch_pe_ratios(self):
     self.pe_ratios = MSNMoney(self.ticker_symbol)
