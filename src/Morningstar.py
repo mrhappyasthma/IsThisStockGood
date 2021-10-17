@@ -180,7 +180,7 @@ def compute_growth_rates_for_data(data):
     results.append(average_3)
   if len(data) > 5:
     average_5 = RuleOne.compound_annual_growth_rate(data[-6], data[-1], 5)
-    results.append(average_3)
+    results.append(average_5)
   if len(data) > 6:
     last_index = len(data) - 1
     max = RuleOne.compound_annual_growth_rate(data[0], data[-1], last_index)
