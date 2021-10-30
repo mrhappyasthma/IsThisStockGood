@@ -20,6 +20,12 @@ should be used at your own discretion. Obviously investing always carries some r
 but if you follow the principles in Rule #1 investing, then this site should be a
 "one stop shop" for all the calculations/resources you may need.
 
+## Stock Screening
+
+If you want to run bulk queries for stock analysis, check out the [Rule 1 Stock Screener](https://github.com/mrhappyasthma/Rule1-StockScreener) repository.
+
+This repository contains a script to iteratively issue a bulk fetch and populate a MySQL database with the results. It also includes some predefined SQL queries for convenience.
+
 ## Running the site locally.
 
 1. Clone the repo.
