@@ -1,8 +1,8 @@
 import random
 import src.RuleOneInvestingCalculations as RuleOne
 from requests_futures.sessions import FuturesSession
-from src.Morningstar import MorningstarRatios
 from src.MSNMoney import MSNMoney
+from src.StockRow import StockRowKeyStats
 from src.YahooFinance import YahooFinanceAnalysis
 from src.YahooFinance import YahooFinanceQuote
 from src.YahooFinance import YahooFinanceQuoteSummary, YahooFinanceQuoteSummaryModule
@@ -28,7 +28,6 @@ def fetchDataForTickerSymbol(ticker):
         'free_cash_flow',
         'debt_payoff_time',
         'debt_equity_ratio',
-        'ttm_net_income',
         'margin_of_safety_price',
         'current_price'
   """
@@ -40,7 +39,7 @@ def fetchDataForTickerSymbol(ticker):
 
   # Make all network request asynchronously to build their portion of
   # the json results.
-  data_fetcher.fetch_morningstar_ratios()
+  data_fetcher.fetch_stockrow_key_stats()
   data_fetcher.fetch_pe_ratios()
   data_fetcher.fetch_yahoo_finance_analysis()
   data_fetcher.fetch_yahoo_finance_quote()
@@ -50,28 +49,27 @@ def fetchDataForTickerSymbol(ticker):
   for rpc in data_fetcher.rpcs:
     rpc.result()
 
-  ratios = data_fetcher.ratios
-  if ratios:
-    ratios.calculate_long_term_debt()
+  key_stats = data_fetcher.stockrow_key_stats
+  if not key_stats:
+    return None
   pe_ratios = data_fetcher.pe_ratios
   yahoo_finance_analysis = data_fetcher.yahoo_finance_analysis
   yahoo_finance_quote = data_fetcher.yahoo_finance_quote
-  if not ratios:
-    return None
-  margin_of_safety_price, sticker_price = _calculateMarginOfSafetyPrice(ratios, pe_ratios, yahoo_finance_analysis)
-  payback_time = _calculatePaybackTime(ratios, yahoo_finance_quote, yahoo_finance_analysis)
+  margin_of_safety_price, sticker_price = _calculateMarginOfSafetyPrice(key_stats, pe_ratios, yahoo_finance_quote, yahoo_finance_analysis)
+  payback_time = _calculatePaybackTime(key_stats, yahoo_finance_quote, yahoo_finance_analysis)
   template_values = {
     'ticker' : ticker,
     'name' : yahoo_finance_quote.name if yahoo_finance_quote and yahoo_finance_quote.name else 'null',
-    'roic': ratios.roic_averages if ratios.roic_averages else [],
-    'eps': ratios.eps_growth_rate_averages if ratios.eps_growth_rate_averages else [],
-    'sales': ratios.sales_growth_rate_averages if ratios.sales_growth_rate_averages else [],
-    'equity': ratios.equity_growth_rates if ratios.equity_growth_rates else [],
-    'cash': ratios.free_cash_flow_growth_rates if ratios.free_cash_flow_growth_rates else [],
-    'long_term_debt' : ratios.long_term_debt,
-    'free_cash_flow' : ratios.recent_free_cash_flow,
-    'debt_payoff_time' : ratios.debt_payoff_time,
-    'debt_equity_ratio' : ratios.debt_equity_ratio if ratios.debt_equity_ratio >= 0 else -1,
+    'roic': key_stats.roic_averages if key_stats.roic_averages else [],
+    'eps': key_stats.eps_growth_rates if key_stats.eps_growth_rates else [],
+    'sales': key_stats.revenue_growth_rates if key_stats.revenue_growth_rates else [],
+    'equity': key_stats.equity_growth_rates if key_stats.equity_growth_rates else [],
+    'cash': key_stats.free_cash_flow_growth_rates if key_stats.free_cash_flow_growth_rates else [],
+    # TODO: Figure out how to get long-term debt instead of total debt
+    'total_debt' : key_stats.total_debt,
+    'free_cash_flow' : key_stats.recent_free_cash_flow,
+    'debt_payoff_time' : key_stats.debt_payoff_time,
+    'debt_equity_ratio' : key_stats.debt_equity_ratio if key_stats.debt_equity_ratio >= 0 else -1,
     'margin_of_safety_price' : margin_of_safety_price if margin_of_safety_price else 'null',
     'current_price' : yahoo_finance_quote.current_price if yahoo_finance_quote and yahoo_finance_quote.current_price else 'null',
     'sticker_price' : sticker_price if sticker_price else 'null',
@@ -80,78 +78,40 @@ def fetchDataForTickerSymbol(ticker):
   }
   return template_values
 
-
-def _jsonpToCSV(s):
-  # Handle a weird edge case where morningstar may return
-  # the string '{"componentData":null}'
-  if s == '{"componentData":null}':
-    return ''
-
-  arr = []
-  ignore = False
-  printing = False
-  s = s.replace(',', '')
-  s = s.replace('\/', '/')
-  s = s.replace('&amp', '&')
-  s = s.replace('&nbsp;', ' ')
-  s = s.replace('</tr>', '\n')
-  for c in s:
-    if c == '<':
-      ignore = True
-      printing = False
-      continue
-    elif c == '>':
-      ignore = False
-      printing = False
-      continue
-    elif not ignore:
-      if not printing:
-        printing = True
-        arr.append(',')
-      arr.append(c)
-  output = ''.join(arr)
-  output = output.replace('\n,', '\n')
-  output = output.replace(',\n', '\n')
-  output = output.replace(' ,', ' ')
-  output = output.replace('&mdash;', '')
-  if len(output) == 0:
-    return ''
-  return output[1:] if output[0] == ',' else output
-
-
-def _calculateMarginOfSafetyPrice(ratios, pe_ratios, yahoo_finance_analysis):
-  if not ratios or not pe_ratios or not yahoo_finance_analysis:
+def _calculateMarginOfSafetyPrice(key_stats, pe_ratios, yahoo_finance_quote, yahoo_finance_analysis):
+  if not key_stats or not pe_ratios or not yahoo_finance_analysis:
     return None, None
 
-  if not yahoo_finance_analysis.five_year_growth_rate or not ratios.equity_growth_rates:
+  if not yahoo_finance_analysis.five_year_growth_rate or not key_stats.equity_growth_rates:
     return None, None
   growth_rate = min(float(yahoo_finance_analysis.five_year_growth_rate),
-                    float(ratios.equity_growth_rates[-1]))
+                    float(key_stats.equity_growth_rates[-1]))
   # Divide the growth rate by 100 to convert from percent to decimal.
   growth_rate = growth_rate / 100.0
 
-  if not ratios.ttm_eps or not pe_ratios.pe_low or not pe_ratios.pe_high:
+  if not yahoo_finance_quote or not yahoo_finance_quote.ttm_eps or not pe_ratios.pe_low or not pe_ratios.pe_high:
     return None, None
   margin_of_safety_price, sticker_price = \
-      RuleOne.margin_of_safety_price(float(ratios.ttm_eps), growth_rate,
+      RuleOne.margin_of_safety_price(float(yahoo_finance_quote.ttm_eps), growth_rate,
                                      float(pe_ratios.pe_low), float(pe_ratios.pe_high))
   return margin_of_safety_price, sticker_price
 
 
-def _calculatePaybackTime(ratios, yahoo_finance_quote, yahoo_finance_analysis):
-  if not ratios or not yahoo_finance_quote or not yahoo_finance_analysis:
+def _calculatePaybackTime(key_stats, yahoo_finance_quote, yahoo_finance_analysis):
+  if not key_stats or not yahoo_finance_quote or not yahoo_finance_analysis:
     return None
 
-  if not yahoo_finance_analysis.five_year_growth_rate or not ratios.equity_growth_rates:
+  if not yahoo_finance_analysis.five_year_growth_rate or not key_stats.equity_growth_rates:
     return None
   growth_rate = min(float(yahoo_finance_analysis.five_year_growth_rate),
-                    float(ratios.equity_growth_rates[-1]))
+                    float(key_stats.equity_growth_rates[-1]))
   # Divide the growth rate by 100 to convert from percent to decimal.
   growth_rate = growth_rate / 100.0
 
-  if not ratios.ttm_net_income or not yahoo_finance_quote.market_cap:
+  # TODO: Figure out how to get TTM net income instead of previous year net income.
+  if not key_stats.last_year_net_income or not yahoo_finance_quote.market_cap:
     return None
-  payback_time = RuleOne.payback_time(yahoo_finance_quote.market_cap, ratios.ttm_net_income, growth_rate)
+  payback_time = RuleOne.payback_time(yahoo_finance_quote.market_cap, key_stats.last_year_net_income, growth_rate)
   return payback_time
 
 
@@ -170,7 +130,7 @@ class DataFetcher():
     self.lock = Lock()
     self.rpcs = []
     self.ticker_symbol = ''
-    self.ratios = None
+    self.stockrow_key_stats = None
     self.pe_ratios = None
     self.yahoo_finance_analysis = None
     self.yahoo_finance_quote = None
@@ -184,43 +144,24 @@ class DataFetcher():
     })
     return session
 
-  def fetch_morningstar_ratios(self):
-    self.ratios = MorningstarRatios(self.ticker_symbol)
+  def fetch_stockrow_key_stats(self):
+    self.stockrow_key_stats = StockRowKeyStats(self.ticker_symbol)
     session = self._create_session()
-    key_stat_rpc = session.get(self.ratios.key_stat_url, hooks={
-       'response': self.parse_morningstar_ratios,
+    key_stat_rpc = session.get(self.stockrow_key_stats.key_stat_url, hooks={
+       'response': self.parse_stockrow_key_stats,
     })
     self.rpcs.append(key_stat_rpc)
 
-    finance_rpc = session.get(self.ratios.finance_url, hooks={
-       'response': self.parse_morningstar_finances,
-    })
-    self.rpcs.append(finance_rpc)
-
   # Called asynchronously upon completion of the URL fetch from
-  # `fetch_morningstar_ratios`.
-  def parse_morningstar_finances(self, response, *args, **kwargs):
+  # `fetch_stockrow_key_stats`.
+  def parse_stockrow_key_stats(self, response, *args, **kwargs):
     self.lock.acquire()
-    if not self.ratios:
+    if not self.stockrow_key_stats:
       self.lock.release()
       return
-    parsed_content = _jsonpToCSV(response.text)
-    success = self.ratios.parse_finances(parsed_content.split('\n'))
+    success = self.stockrow_key_stats.parse_json_data(response.content)
     if not success:
-      self.ratios = None
-    self.lock.release()
-
-  # Called asynchronously upon completion of the URL fetch from
-  # `fetch_morningstar_ratios`.
-  def parse_morningstar_ratios(self, response, *args, **kwargs):
-    self.lock.acquire()
-    if not self.ratios:
-      self.lock.release()
-      return
-    parsed_content = _jsonpToCSV(response.text)
-    success = self.ratios.parse_ratios(parsed_content.split('\n'))
-    if not success:
-      self.ratios = None
+      self.stockrow_key_stats = None
     self.lock.release()
 
   def fetch_pe_ratios(self):

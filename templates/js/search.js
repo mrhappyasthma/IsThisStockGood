@@ -68,7 +68,7 @@ $(document).ready(function() {
       // Update management numbers.
       updateHtmlWithValueForKey(data, 'debt_equity_ratio', /*commas=*/true);
       colorCellWithIDForZeroBasedRange('#debt_equity_ratio', [1, 2, 3]);
-      updateHtmlWithValueForKey(data, 'long_term_debt', /*commas=*/true);
+      updateHtmlWithValueForKey(data, 'total_debt', /*commas=*/true);
       updateHtmlWithValueForKey(data, 'free_cash_flow', /*commas=*/true);
       let cash_flow = $('#free_cash_flow').html();
       if (parseInt(cash_flow) >= 0) {

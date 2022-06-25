@@ -22,6 +22,7 @@ class YahooFinanceQuote:
     self.market_cap = None
     self.name = None
     self.average_volume = None
+    self.ttm_eps = None
 
   def parse_quote(self, content):
     data = json.loads(content)
@@ -32,6 +33,7 @@ class YahooFinanceQuote:
     success = success and self._parse_market_cap(results)
     success = success and self._parse_name(results)
     success = success and self._parse_average_volume(results)
+    success = success and self._parse_ttm_eps(results)
     return success
 
   def _parse_current_price(self, results):
@@ -56,6 +58,11 @@ class YahooFinanceQuote:
       averageDailyVolume10Day = results[0].get('averageDailyVolume10Day', -1)
       self.average_volume = max(0, min(regularMarketVolume, averageDailyVolume3Month, averageDailyVolume10Day))
     return True if self.average_volume else False
+    
+  def _parse_ttm_eps(self, results):
+    if results:
+      self.ttm_eps = results[0].get('epsTrailingTwelveMonths', None)
+    return True if self.ttm_eps else False
 
 
 class YahooFinanceAnalysis:
