@@ -197,7 +197,7 @@ def compute_averages_for_data(data):
   if data is None or len(data) < 2:
     return None
   results = []
-  results.append(data[-1])
+  results.append(round(data[-1], 2))
   if len(data) >= 3:
     three_year = _average(data[-3:])
     results.append(three_year)
