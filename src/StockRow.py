@@ -117,11 +117,13 @@ def _add_list_of_dicts_to_dict(list_of_dicts, target_dict, key_name):
 
 
 def _get_nested_values_for_key(dictionary, key):
-  return dictionary.get(key, {}).get("values", [])
+  elements = dictionary.get(key, {}).get("values", [])
+  return [x for x in elements if isinstance(x, (int, float, complex))]
  
  
 def _get_nested_value_for_key(dictionary, key):
-  return dictionary.get(key, {}).get("value", None)
+  value = dictionary.get(key, {}).get("value", None)
+  return value if isinstance(value, (int, float, complex)) else None
 
 
 def extract_averages_from_data_for_key(raw_data, key):
