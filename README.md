@@ -1,5 +1,7 @@
 # IsThisStockGood
 
+[![IsThisStockGood](https://circleci.com/gh/mrhappyasthma/IsThisStockGood.svg?style=shield)](https://app.circleci.com/pipelines/github/mrhappyasthma/IsThisStockGood)
+
 [IsThisStockGood.com](http://www.isthisstockgood.com)
 
 This website attempts to automate much of the calculations described in Phil Town's
