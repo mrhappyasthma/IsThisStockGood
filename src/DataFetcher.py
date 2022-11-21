@@ -1,7 +1,6 @@
 import random
 import src.RuleOneInvestingCalculations as RuleOne
 from requests_futures.sessions import FuturesSession
-from src.MSNMoney import MSNMoney
 from src.StockRow import StockRowKeyStats
 from src.YahooFinance import YahooFinanceAnalysis
 from src.YahooFinance import YahooFinanceQuote
@@ -40,7 +39,6 @@ def fetchDataForTickerSymbol(ticker):
   # Make all network request asynchronously to build their portion of
   # the json results.
   data_fetcher.fetch_stockrow_key_stats()
-  data_fetcher.fetch_pe_ratios()
   data_fetcher.fetch_yahoo_finance_analysis()
   data_fetcher.fetch_yahoo_finance_quote()
   data_fetcher.fetch_yahoo_finance_quote_summary()
@@ -52,10 +50,9 @@ def fetchDataForTickerSymbol(ticker):
   key_stats = data_fetcher.stockrow_key_stats
   if not key_stats:
     return None
-  pe_ratios = data_fetcher.pe_ratios
   yahoo_finance_analysis = data_fetcher.yahoo_finance_analysis
   yahoo_finance_quote = data_fetcher.yahoo_finance_quote
-  margin_of_safety_price, sticker_price = _calculateMarginOfSafetyPrice(key_stats, pe_ratios, yahoo_finance_quote, yahoo_finance_analysis)
+  margin_of_safety_price, sticker_price = _calculateMarginOfSafetyPrice(key_stats, yahoo_finance_quote, yahoo_finance_analysis)
   payback_time = _calculatePaybackTime(key_stats, yahoo_finance_quote, yahoo_finance_analysis)
   template_values = {
     'ticker' : ticker,
@@ -78,8 +75,8 @@ def fetchDataForTickerSymbol(ticker):
   }
   return template_values
 
-def _calculateMarginOfSafetyPrice(key_stats, pe_ratios, yahoo_finance_quote, yahoo_finance_analysis):
-  if not key_stats or not pe_ratios or not yahoo_finance_analysis:
+def _calculateMarginOfSafetyPrice(key_stats, yahoo_finance_quote, yahoo_finance_analysis):
+  if not key_stats or not yahoo_finance_analysis:
     return None, None
 
   if not yahoo_finance_analysis.five_year_growth_rate or not key_stats.equity_growth_rates:
@@ -88,12 +85,11 @@ def _calculateMarginOfSafetyPrice(key_stats, pe_ratios, yahoo_finance_quote, yah
                     float(key_stats.equity_growth_rates[-1]))
   # Divide the growth rate by 100 to convert from percent to decimal.
   growth_rate = growth_rate / 100.0
-
-  if not yahoo_finance_quote or not yahoo_finance_quote.ttm_eps or not pe_ratios.pe_low or not pe_ratios.pe_high:
+  if not yahoo_finance_quote or not yahoo_finance_quote.ttm_eps or not key_stats.pe_low or not key_stats.pe_high:
     return None, None
   margin_of_safety_price, sticker_price = \
       RuleOne.margin_of_safety_price(float(yahoo_finance_quote.ttm_eps), growth_rate,
-                                     float(pe_ratios.pe_low), float(pe_ratios.pe_high))
+                                     float(key_stats.pe_low), float(key_stats.pe_high))
   return margin_of_safety_price, sticker_price
 
 
@@ -163,26 +159,6 @@ class DataFetcher():
     if not success:
       self.stockrow_key_stats = None
     self.lock.release()
-
-  def fetch_pe_ratios(self):
-    self.pe_ratios = MSNMoney(self.ticker_symbol)
-    session = self._create_session()
-    rpc = session.get(self.pe_ratios.url, allow_redirects=True, hooks={
-       'response': self.parse_pe_ratios,
-    })
-    self.rpcs.append(rpc)
-
-  # Called asynchronously upon completion of the URL fetch from
-  # `fetch_pe_ratios`.
-  def parse_pe_ratios(self, response, *args, **kwargs):
-    if response.status_code != 200:
-      return
-    if not self.pe_ratios:
-      return
-    result = response.text
-    success = self.pe_ratios.parse(result)
-    if not success:
-      self.pe_ratios = None
 
   def fetch_yahoo_finance_analysis(self):
     self.yahoo_finance_analysis = YahooFinanceAnalysis(self.ticker_symbol)

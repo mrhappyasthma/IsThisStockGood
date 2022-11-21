@@ -34,6 +34,8 @@ class StockRowKeyStats:
     self.recent_free_cash_flow = 0
     self.debt_payoff_time = 0
     self.debt_equity_ratio = -1
+    self.pe_high = None
+    self.pe_low = None
 
   def parse_json_data(self, data):
     try:
@@ -90,6 +92,10 @@ class StockRowKeyStats:
       
       total_debts = _get_nested_values_for_key(data_dict, "Total Debt") # Already in USD millions
       self.calculate_total_debt(total_debts)
+
+      pe_ratios = _get_nested_values_for_key(data_dict, "PE Ratio")
+      self.pe_low = min(pe_ratios[-5:])
+      self.pe_high = max(pe_ratios[-5:])
 
     except Exception as e:
       logging.error(traceback.format_exc())
