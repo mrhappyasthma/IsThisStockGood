@@ -94,8 +94,8 @@ class StockRowKeyStats:
       self.calculate_total_debt(total_debts)
 
       pe_ratios = _get_nested_values_for_key(data_dict, "PE Ratio")
-      self.pe_low = min([x for x in pe_ratios[-5:] if x>0])
-      self.pe_high = max([x for x in pe_ratios[-5:] if x>0])
+      self.pe_low = min([x for x in pe_ratios[-5:] if x>0], default=None)
+      self.pe_high = max([x for x in pe_ratios[-5:] if x>0], default=None)
 
     except Exception as e:
       logging.error(traceback.format_exc())
