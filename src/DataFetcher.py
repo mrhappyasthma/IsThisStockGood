@@ -76,7 +76,7 @@ def fetchDataForTickerSymbol(ticker):
   return template_values
 
 def _calculateMarginOfSafetyPrice(key_stats, yahoo_finance_quote, yahoo_finance_analysis):
-  if not key_stats or not yahoo_finance_analysis:
+  if not key_stats or not yahoo_finance_analysis or not key_stats.pe_low or not key_stats.pe_high:
     return None, None
 
   if not yahoo_finance_analysis.five_year_growth_rate or not key_stats.equity_growth_rates:
@@ -85,7 +85,7 @@ def _calculateMarginOfSafetyPrice(key_stats, yahoo_finance_quote, yahoo_finance_
                     float(key_stats.equity_growth_rates[-1]))
   # Divide the growth rate by 100 to convert from percent to decimal.
   growth_rate = growth_rate / 100.0
-  if not yahoo_finance_quote or not yahoo_finance_quote.ttm_eps or not key_stats.pe_low or not key_stats.pe_high:
+  if not yahoo_finance_quote or not yahoo_finance_quote.ttm_eps:
     return None, None
   margin_of_safety_price, sticker_price = \
       RuleOne.margin_of_safety_price(float(yahoo_finance_quote.ttm_eps), growth_rate,
