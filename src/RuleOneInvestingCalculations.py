@@ -119,9 +119,11 @@ def margin_of_safety_price(current_eps, estimated_growth_rate,
         minimum of a professional growth estimate and the historical growth
         rate of equity/book-value-per-share.)
     historical_low_pe: The 5-year low for the price-to-earnings (PE) ratio.
-        Usually found on MSN Money.
+        MSN Money doesn't provide this value anymore. Switched to stockrow.
+        However, stockrow doesn't always have accurate data.
     historical_high_pe: The 5-year high for the price-to-earnings (PE) ratio.
-        Usually found on MSN Money.
+        MSN Money doesn't provide this value anymore. Switched to stockrow.
+        However, stockrow doesn't always have accurate data.
 
   Returns:
      1. The maximum price to buy the stock for with a 50% margin of safety.
