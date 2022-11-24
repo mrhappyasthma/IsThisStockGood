@@ -1,46 +1,38 @@
-import logging
-from lxml import html
-
-def isfloat(value):
-  if value is None:
-    return False
-  try:
-    float(value)
-    return True
-  except ValueError:
-    return False
+import json
 
 class MSNMoney:
-  BASE_URL = 'https://www.msn.com/en-us/money/stockdetails/analysis?symbol={}'
-  PE_HIGH_KEY = 'P/E Ratio 5-Year High'
-  PE_LOW_KEY = 'P/E Ratio 5-Year Low'
-
-  @classmethod
-  def construct_url(cls, ticker_symbol,):
-    url = MSNMoney.BASE_URL.format(ticker_symbol)
-    return url
+  TICKER_URL = 'https://services.bingapis.com/contentservices-finance.csautosuggest/api/v1/Query?query={}&market=en-us'
+  BASE_URL = 'https://services.bingapis.com/contentservices-finance.financedataservice/api/v1/KeyRatios?stockId={}'
 
   def __init__(self, ticker_symbol):
     self.ticker_symbol = ticker_symbol.replace('.', '')
     self.pe_high = None
     self.pe_low = None
-    self.url = MSNMoney.construct_url(self.ticker_symbol)
 
-  def nextFloatFromIterator(self, iterator):
-    node = None
-    while node is None or not isfloat(node.text):
-      node = next(iterator)
-    return node.text
+  def get_ticker_autocomplete_url(self):
+    return self.TICKER_URL.format(self.ticker_symbol)
+
+  def get_financials_url(self, stock_id):
+    return self.BASE_URL.format(stock_id)
+
+  def extract_stock_id(self, content):
+    data = json.loads(content)
+    for ticker in data['data']['stocks']:
+        js = json.loads(ticker)
+        if js['RT00S'] == self.ticker_symbol:
+            return js['SecId']
 
   def parse(self, content):
-    tree = html.fromstring(bytes(content, encoding='utf8'))
-    tree_iterator = tree.iter()
-    for element in tree_iterator:
-      text = element.text
-      if text == MSNMoney.PE_HIGH_KEY:
-        self.pe_high = self.nextFloatFromIterator(tree_iterator)
-      if text == MSNMoney.PE_LOW_KEY:
-        self.pe_low = self.nextFloatFromIterator(tree_iterator)
-    if self.pe_high is not None and self.pe_low is not None:
-      return True
-    return False
+    data = json.loads(content)
+    recent_pe_ratios = [
+      year['priceToEarningsRatio']
+      for year in data['companyMetrics']
+      if year['fiscalPeriodType'] == 'Annual'
+      and 'priceToEarningsRatio' in year
+    ][-5:]
+    try:
+      self.pe_high = max(recent_pe_ratios)
+      self.pe_low = min(recent_pe_ratios)
+    except ValueError:
+        return False
+    return True

@@ -165,19 +165,34 @@ class DataFetcher():
     self.lock.release()
 
   def fetch_pe_ratios(self):
+    """
+    Fetching PE Ratios to calculate Sticker Price and Safety Margin Price
+    First we need to get an internal MSN stock id for a ticker
+    and then fetch PE Ratios.
+    """
     self.pe_ratios = MSNMoney(self.ticker_symbol)
     session = self._create_session()
-    rpc = session.get(self.pe_ratios.url, allow_redirects=True, hooks={
+    rpc = session.get(self.pe_ratios.get_ticker_autocomplete_url(), allow_redirects=True, hooks={
+       'response': self.continue_fetching_pe_ratios,
+    })
+    self.rpcs.append(rpc)
+
+  def continue_fetching_pe_ratios(self, response, *args, **kwargs):
+    """
+    After msn_stock_id was fetched in fetch_pe_ratios method
+    we can now get the financials
+    """
+    msn_stock_id = self.pe_ratios.extract_stock_id(response.text)
+    session = self._create_session()
+    rpc = session.get(self.pe_ratios.get_financials_url(msn_stock_id), allow_redirects=True, hooks={
        'response': self.parse_pe_ratios,
     })
     self.rpcs.append(rpc)
 
   # Called asynchronously upon completion of the URL fetch from
-  # `fetch_pe_ratios`.
+  # `fetch_pe_ratios` and `continue_fetching_pe_ratios`.
   def parse_pe_ratios(self, response, *args, **kwargs):
     if response.status_code != 200:
-      return
-    if not self.pe_ratios:
       return
     result = response.text
     success = self.pe_ratios.parse(result)
