@@ -184,7 +184,7 @@ class DataFetcher():
     """
     msn_stock_id = self.pe_ratios.extract_stock_id(response.text)
     session = self._create_session()
-    rpc = session.get(self.pe_ratios.get_financials_url(msn_stock_id), allow_redirects=True, hooks={
+    rpc = session.get(self.pe_ratios.get_key_ratios_url(msn_stock_id), allow_redirects=True, hooks={
        'response': self.parse_pe_ratios,
     })
     self.rpcs.append(rpc)
@@ -194,8 +194,10 @@ class DataFetcher():
   def parse_pe_ratios(self, response, *args, **kwargs):
     if response.status_code != 200:
       return
+    if not self.pe_ratios:
+      return
     result = response.text
-    success = self.pe_ratios.parse(result)
+    success = self.pe_ratios.parse_pe_ratios(result)
     if not success:
       self.pe_ratios = None
 
