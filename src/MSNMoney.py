@@ -1,46 +1,43 @@
-import logging
-from lxml import html
-
-def isfloat(value):
-  if value is None:
-    return False
-  try:
-    float(value)
-    return True
-  except ValueError:
-    return False
+import json
 
 class MSNMoney:
-  BASE_URL = 'https://www.msn.com/en-us/money/stockdetails/analysis?symbol={}'
-  PE_HIGH_KEY = 'P/E Ratio 5-Year High'
-  PE_LOW_KEY = 'P/E Ratio 5-Year Low'
-
-  @classmethod
-  def construct_url(cls, ticker_symbol,):
-    url = MSNMoney.BASE_URL.format(ticker_symbol)
-    return url
+  TICKER_URL = 'https://services.bingapis.com/contentservices-finance.csautosuggest/api/v1/Query?query={}&market=en-us'
+  KEY_RATIOS_URL = 'https://services.bingapis.com/contentservices-finance.financedataservice/api/v1/KeyRatios?stockId={}'
+  KEY_RATIOS_YEAR_SPAN = 5
 
   def __init__(self, ticker_symbol):
     self.ticker_symbol = ticker_symbol.replace('.', '')
     self.pe_high = None
     self.pe_low = None
-    self.url = MSNMoney.construct_url(self.ticker_symbol)
 
-  def nextFloatFromIterator(self, iterator):
-    node = None
-    while node is None or not isfloat(node.text):
-      node = next(iterator)
-    return node.text
+  def get_ticker_autocomplete_url(self):
+    return self.TICKER_URL.format(self.ticker_symbol)
 
-  def parse(self, content):
-    tree = html.fromstring(bytes(content, encoding='utf8'))
-    tree_iterator = tree.iter()
-    for element in tree_iterator:
-      text = element.text
-      if text == MSNMoney.PE_HIGH_KEY:
-        self.pe_high = self.nextFloatFromIterator(tree_iterator)
-      if text == MSNMoney.PE_LOW_KEY:
-        self.pe_low = self.nextFloatFromIterator(tree_iterator)
-    if self.pe_high is not None and self.pe_low is not None:
-      return True
-    return False
+  def get_key_ratios_url(self, stock_id):
+    return self.KEY_RATIOS_URL.format(stock_id)
+
+  def extract_stock_id(self, content):
+    data = json.loads(content)
+    for ticker in data.get('data', {}).get('stocks', []):
+        js = json.loads(ticker)
+        if js.get('RT00S', '').upper() == self.ticker_symbol.upper():
+            return js.get('SecId', '')
+
+  def parse_pe_ratios(self, content):
+    return self._parse_pe_ratios(json.loads(content))
+
+  def _parse_pe_ratios(self, data):
+    recent_pe_ratios = [
+      year.get('priceToEarningsRatio', None)
+      for year in data.get('companyMetrics', [])
+      if year.get('fiscalPeriodType', '') == 'Annual'
+      and 'priceToEarningsRatio' in year
+    ][-self.KEY_RATIOS_YEAR_SPAN:]
+    if len(recent_pe_ratios) != self.KEY_RATIOS_YEAR_SPAN:
+      return False
+    try:
+      self.pe_high = max(recent_pe_ratios)
+      self.pe_low = min(recent_pe_ratios)
+    except ValueError:
+        return False
+    return True
