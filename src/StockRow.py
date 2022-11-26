@@ -7,6 +7,13 @@ import logging
 import src.RuleOneInvestingCalculations as RuleOne
 import traceback
 
+# Stockrow does not seem to update their ticker symbols very promptly. This can be used
+# as a temporary mapping to allow strocks to continue to work after a rename.
+def _temporary_ticker_mapping(ticker_symbol):
+  mapping = {
+      'META' : 'FB'
+  }
+  return mapping.get(ticker_symbol.upper(), ticker_symbol)
 
 class StockRowKeyStats:
   """An object wrapping the key stats data from stockrow.com"""
@@ -19,8 +26,8 @@ class StockRowKeyStats:
     Args:
       ticker_symbol: A string representing the ticker symbol.
     """
-    self.ticker_symbol = ticker_symbol
-    self.key_stat_url = self.STOCKROW_KEY_STATS_URL.format(ticker_symbol)
+    self.ticker_symbol = _temporary_ticker_mapping(ticker_symbol)
+    self.key_stat_url = self.STOCKROW_KEY_STATS_URL.format(self.ticker_symbol)
     self.roic = []  # Return on invested capital
     self.roic_averages = []
     self.equity = []  # Equity or BVPS (book value per share)
