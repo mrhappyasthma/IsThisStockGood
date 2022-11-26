@@ -17,6 +17,18 @@ class MSNMoneyTest(unittest.TestCase):
     }
     self.assertFalse(MSNMoney('DUMMY')._parse_pe_ratios(payload))
 
+  def test_parse_pe_ratios_should_return_false_if_too_few_pe_ratios(self):
+    msn = MSNMoney('DUMMY')
+    payload = {
+      'companyMetrics' : [
+        {
+          'fiscalPeriodType' : 'Annual',
+          'priceToEarningsRatio' : 22.5
+        },
+      ]
+    }
+    self.assertFalse(msn._parse_pe_ratios(payload))
+
   def test_parse_pe_ratios_should_properly_calculate_pe_ratios(self):
     msn = MSNMoney('DUMMY')
     payload = {

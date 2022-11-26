@@ -33,6 +33,8 @@ class MSNMoney:
       if year.get('fiscalPeriodType', '') == 'Annual'
       and 'priceToEarningsRatio' in year
     ][-self.KEY_RATIOS_YEAR_SPAN:]
+    if len(recent_pe_ratios) != self.KEY_RATIOS_YEAR_SPAN:
+      return False
     try:
       self.pe_high = max(recent_pe_ratios)
       self.pe_low = min(recent_pe_ratios)
