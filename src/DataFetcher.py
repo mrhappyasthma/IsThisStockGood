@@ -45,6 +45,7 @@ def fetchDataForTickerSymbol(ticker):
   data_fetcher.fetch_yahoo_finance_quote()
   data_fetcher.fetch_yahoo_finance_quote_summary()
 
+
   # Wait for each RPC result before proceeding.
   for rpc in data_fetcher.rpcs:
     rpc.result()
@@ -60,7 +61,7 @@ def fetchDataForTickerSymbol(ticker):
   template_values = {
     'ticker' : ticker,
     'name' : yahoo_finance_quote.name if yahoo_finance_quote and yahoo_finance_quote.name else 'null',
-    'roic': key_stats.roic_averages if key_stats.roic_averages else [],
+    'roic': data_fetcher.get_roic_averages(),
     'eps': key_stats.eps_growth_rates if key_stats.eps_growth_rates else [],
     'sales': key_stats.revenue_growth_rates if key_stats.revenue_growth_rates else [],
     'equity': key_stats.equity_growth_rates if key_stats.equity_growth_rates else [],
@@ -242,7 +243,10 @@ class DataFetcher():
       self.yahoo_finance_quote = None
 
   def fetch_yahoo_finance_quote_summary(self):
-    modules = [YahooFinanceQuoteSummaryModule.assetProfile]
+    modules = [
+        YahooFinanceQuoteSummaryModule.incomeStatementHistory,
+        YahooFinanceQuoteSummaryModule.balanceSheetHistory
+    ]
     self.yahoo_finance_quote_summary = YahooFinanceQuoteSummary(self.ticker_symbol, modules)
     session = self._create_session()
     rpc = session.get(self.yahoo_finance_quote_summary.url, allow_redirects=True, hooks={
@@ -261,3 +265,32 @@ class DataFetcher():
     success = self.yahoo_finance_quote_summary.parse_modules(result)
     if not success:
       self.yahoo_finance_quote_summary = None
+
+  def get_roic_averages(self):
+    """
+    Calculate ROIC averages for 1,3,5 and Max years
+    StockRow averages aren't accurate, so we're getting avgs for 1y and 3y from Yahoo
+    by calculating these by ouselves. The rest is from StockRow to at least have some (even
+    a bit inaccurate values), cause Yahoo has data for 4 years only.
+    """
+    roic_avgs = []
+    try:
+      roic_avgs.append(self.yahoo_finance_quote_summary.get_roic_average(years=1))
+    except AttributeError:
+      try:
+        roic_avgs.append(self.stockrow_key_stats.roic_averages[0])
+      except IndexError:
+        return []
+    try:
+      roic_avgs.append(self.yahoo_finance_quote_summary.get_roic_average(years=3))
+    except AttributeError:
+      try:
+        roic_avgs.append(self.stockrow_key_stats.roic_averages[1])
+      except IndexError:
+        return roic_avgs
+    try:
+      roic_avgs.append(self.stockrow_key_stats.roic_averages[2])
+      roic_avgs.append(self.stockrow_key_stats.roic_averages[-1])
+    except IndexError:
+      pass
+    return roic_avgs

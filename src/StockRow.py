@@ -97,7 +97,6 @@ class StockRowKeyStats:
       
       total_debts = _get_nested_values_for_key(data_dict, "Total Debt") # Already in USD millions
       self.calculate_total_debt(total_debts)
-
     except Exception as e:
       logging.error(traceback.format_exc())
       return False
