@@ -275,14 +275,14 @@ class DataFetcher():
     """
     roic_avgs = []
     try:
-      roic_avgs.append(self.yahoo_finance_quote_summary.get_roic_average(years=1))
+      roic_avgs.append(self.get_roic_average(years=1))
     except AttributeError:
       try:
         roic_avgs.append(self.stockrow_key_stats.roic_averages[0])
       except IndexError:
         return []
     try:
-      roic_avgs.append(self.yahoo_finance_quote_summary.get_roic_average(years=3))
+      roic_avgs.append(self.get_roic_average(years=3))
     except AttributeError:
       try:
         roic_avgs.append(self.stockrow_key_stats.roic_averages[1])
@@ -290,7 +290,40 @@ class DataFetcher():
         return roic_avgs
     try:
       roic_avgs.append(self.stockrow_key_stats.roic_averages[2])
-      roic_avgs.append(self.stockrow_key_stats.roic_averages[-1])
+      roic_avgs.append(self.stockrow_key_stats.roic_averages[3])
     except IndexError:
       pass
     return roic_avgs
+
+  def _get_roic_history(self):
+    """
+    Calculates ROIC historial values based on annual financial statements.
+
+    net_income_history: Net Income (starts from the last annual statement)
+    cash_history: Cash (starts from the last annual statement)
+    long_term_debt_history: Long Term Debt (starts from the last annual statement)
+    stockholder_equity_history: Stockholder Equity (starts from the last annual statement)
+    """
+    net_income_history = self.yahoo_finance_quote_summary.get_income_statement_history('netIncome')
+    cash_history = self.yahoo_finance_quote_summary.get_balance_sheet_history('cash')
+    long_term_debt_history = self.yahoo_finance_quote_summary.get_balance_sheet_history(
+       'longTermDebt'
+    )
+    stockholder_equity_history = self.yahoo_finance_quote_summary.get_balance_sheet_history(
+       'totalStockholderEquity'
+    )
+    roic_history = []
+    for i in range(0, len(net_income_history)):
+      roic_history.append(
+        RuleOne.calculate_roic(
+          net_income_history[i], cash_history[i],
+          long_term_debt_history[i], stockholder_equity_history[i]
+        )
+      )
+    return roic_history
+
+  def get_roic_average(self, years):
+    history = self._get_roic_history()
+    if len(history[0:years]) < years:
+      raise AttributeError("Too few years in ROIC history")
+    return round(sum(history[0:years]) / years, 2)

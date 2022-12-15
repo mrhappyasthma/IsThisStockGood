@@ -90,3 +90,18 @@ class RuleOneInvestingCalculationsTest(unittest.TestCase):
     smaller_margin_of_safety = \
         RuleOne.calculate_margin_of_safety(100, margin_of_safety=0.25)
     self.assertEqual(smaller_margin_of_safety, 75)
+
+  def test_calculate_roic(self):
+    expected_roic_history = [
+        3.857280617164899, 0.9852216748768473, 0.199203187250996, 0.20325203252032523, 20.0
+    ]
+    net_income_history = [400, 200, 100, 50, 20]
+    cash_history = [30, 200, 300, 500, 10]
+    long_term_debt_history = [10000, 20000, 50000, 25000, 10]
+    stockholder_equity_history = [400, 500, 500, 100, 100]
+    for i in range(0, len(expected_roic_history)):
+      roic_history = RuleOne.calculate_roic(
+        net_income_history[i], cash_history[i],
+        long_term_debt_history[i], stockholder_equity_history[i]
+      )
+      self.assertEqual(expected_roic_history[i], roic_history)

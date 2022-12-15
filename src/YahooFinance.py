@@ -206,36 +206,14 @@ class YahooFinanceQuoteSummary:
           break
     return True
 
-  def _get_balance_sheet_history(self, position):
+  def get_balance_sheet_history(self, key):
     history = []
-    for stmt in self.module_data.get('balanceSheetHistory').get('balanceSheetStatements'):
-      history.append(stmt.get(position).get('raw'))
+    for stmt in self.module_data.get('balanceSheetHistory', {}).get('balanceSheetStatements', []):
+      history.append(stmt.get(key).get('raw'))
     return history
 
-  def _get_income_statement_history(self, position):
+  def get_income_statement_history(self, key):
     history = []
-    for stmt in self.module_data.get('incomeStatementHistory').get('incomeStatementHistory'):
-      history.append(stmt.get(position).get('raw'))
+    for stmt in self.module_data.get('incomeStatementHistory', {}).get('incomeStatementHistory', []):
+      history.append(stmt.get(key).get('raw'))
     return history
-
-  def _get_roic_history(self):
-    net_income_history = self._get_income_statement_history('netIncome')
-    cash_history = self._get_balance_sheet_history('cash')
-    long_term_debt_history = self._get_balance_sheet_history('longTermDebt')
-    stockholder_equity_history = self._get_balance_sheet_history('totalStockholderEquity')
-    roic_history = []
-    for i in range(0, len(net_income_history)):
-      roic_history.append(
-        (
-          net_income_history[i]
-          /
-          (stockholder_equity_history[i] + long_term_debt_history[i] - cash_history[i])
-        ) * 100
-      )
-    return roic_history
-
-  def get_roic_average(self, years):
-    history = self._get_roic_history()
-    if len(history[0:years]) < years:
-      raise AttributeError("Too few years in ROIC history")
-    return round(sum(history[0:years]) / years, 2)
