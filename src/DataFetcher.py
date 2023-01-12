@@ -45,6 +45,7 @@ def fetchDataForTickerSymbol(ticker):
   data_fetcher.fetch_yahoo_finance_quote()
   data_fetcher.fetch_yahoo_finance_quote_summary()
 
+
   # Wait for each RPC result before proceeding.
   for rpc in data_fetcher.rpcs:
     rpc.result()
@@ -60,7 +61,7 @@ def fetchDataForTickerSymbol(ticker):
   template_values = {
     'ticker' : ticker,
     'name' : yahoo_finance_quote.name if yahoo_finance_quote and yahoo_finance_quote.name else 'null',
-    'roic': key_stats.roic_averages if key_stats.roic_averages else [],
+    'roic': data_fetcher.get_roic_averages(),
     'eps': key_stats.eps_growth_rates if key_stats.eps_growth_rates else [],
     'sales': key_stats.revenue_growth_rates if key_stats.revenue_growth_rates else [],
     'equity': key_stats.equity_growth_rates if key_stats.equity_growth_rates else [],
@@ -242,7 +243,10 @@ class DataFetcher():
       self.yahoo_finance_quote = None
 
   def fetch_yahoo_finance_quote_summary(self):
-    modules = [YahooFinanceQuoteSummaryModule.assetProfile]
+    modules = [
+        YahooFinanceQuoteSummaryModule.incomeStatementHistory,
+        YahooFinanceQuoteSummaryModule.balanceSheetHistory
+    ]
     self.yahoo_finance_quote_summary = YahooFinanceQuoteSummary(self.ticker_symbol, modules)
     session = self._create_session()
     rpc = session.get(self.yahoo_finance_quote_summary.url, allow_redirects=True, hooks={
@@ -261,3 +265,65 @@ class DataFetcher():
     success = self.yahoo_finance_quote_summary.parse_modules(result)
     if not success:
       self.yahoo_finance_quote_summary = None
+
+  def get_roic_averages(self):
+    """
+    Calculate ROIC averages for 1,3,5 and Max years
+    StockRow averages aren't accurate, so we're getting avgs for 1y and 3y from Yahoo
+    by calculating these by ouselves. The rest is from StockRow to at least have some (even
+    a bit inaccurate values), cause Yahoo has data for 4 years only.
+    """
+    roic_avgs = []
+    try:
+      roic_avgs.append(self.get_roic_average(years=1))
+    except AttributeError:
+      try:
+        roic_avgs.append(self.stockrow_key_stats.roic_averages[0])
+      except IndexError:
+        return []
+    try:
+      roic_avgs.append(self.get_roic_average(years=3))
+    except AttributeError:
+      try:
+        roic_avgs.append(self.stockrow_key_stats.roic_averages[1])
+      except IndexError:
+        return roic_avgs
+    try:
+      roic_avgs.append(self.stockrow_key_stats.roic_averages[2])
+      roic_avgs.append(self.stockrow_key_stats.roic_averages[3])
+    except IndexError:
+      pass
+    return roic_avgs
+
+  def _get_roic_history(self):
+    """
+    Calculates ROIC historial values based on annual financial statements.
+
+    net_income_history: Net Income (starts from the last annual statement)
+    cash_history: Cash (starts from the last annual statement)
+    long_term_debt_history: Long Term Debt (starts from the last annual statement)
+    stockholder_equity_history: Stockholder Equity (starts from the last annual statement)
+    """
+    net_income_history = self.yahoo_finance_quote_summary.get_income_statement_history('netIncome')
+    cash_history = self.yahoo_finance_quote_summary.get_balance_sheet_history('cash')
+    long_term_debt_history = self.yahoo_finance_quote_summary.get_balance_sheet_history(
+       'longTermDebt'
+    )
+    stockholder_equity_history = self.yahoo_finance_quote_summary.get_balance_sheet_history(
+       'totalStockholderEquity'
+    )
+    roic_history = []
+    for i in range(0, len(net_income_history)):
+      roic_history.append(
+        RuleOne.calculate_roic(
+          net_income_history[i], cash_history[i],
+          long_term_debt_history[i], stockholder_equity_history[i]
+        )
+      )
+    return roic_history
+
+  def get_roic_average(self, years):
+    history = self._get_roic_history()
+    if len(history[0:years]) < years:
+      raise AttributeError("Too few years in ROIC history")
+    return round(sum(history[0:years]) / years, 2)

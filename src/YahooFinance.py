@@ -198,9 +198,22 @@ class YahooFinanceQuoteSummary:
     results = data.get('quoteSummary', {}).get('result', None)
     if not results:
       logging.error('Could not parse response for url: ' + self.url)
-      return
+      return False
     for module in self.modules:
       for result in results:
         if module in result:
           self.module_data[module] = result[module]
           break
+    return True
+
+  def get_balance_sheet_history(self, key):
+    history = []
+    for stmt in self.module_data.get('balanceSheetHistory', {}).get('balanceSheetStatements', []):
+      history.append(stmt.get(key).get('raw'))
+    return history
+
+  def get_income_statement_history(self, key):
+    history = []
+    for stmt in self.module_data.get('incomeStatementHistory', {}).get('incomeStatementHistory', []):
+      history.append(stmt.get(key).get('raw'))
+    return history

@@ -254,3 +254,10 @@ def calculate_margin_of_safety(sticker_price, margin_of_safety=0.5):
   if not sticker_price:
     return None
   return sticker_price * (1 - margin_of_safety)
+
+def calculate_roic(net_income, cash, long_term_debt, stockholder_equity):
+  return (
+    net_income
+    /
+    (stockholder_equity + long_term_debt - cash)
+  ) * 100
