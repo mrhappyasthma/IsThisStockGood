@@ -1,4 +1,5 @@
 import random
+import logging
 import src.RuleOneInvestingCalculations as RuleOne
 from requests_futures.sessions import FuturesSession
 from src.MSNMoney import MSNMoney
@@ -7,6 +8,9 @@ from src.YahooFinance import YahooFinanceAnalysis
 from src.YahooFinance import YahooFinanceQuote
 from src.YahooFinance import YahooFinanceQuoteSummary, YahooFinanceQuoteSummaryModule
 from threading import Lock
+
+logger = logging.getLogger("IsThisStockGood")
+
 
 def fetchDataForTickerSymbol(ticker):
   """Fetches and parses all of the financial data for the `ticker`.
@@ -233,8 +237,11 @@ class DataFetcher():
   # Called asynchronously upon completion of the URL fetch from
   # `fetch_yahoo_finance_quote`.
   def parse_yahoo_finance_quote(self, response, *args, **kwargs):
+    logger.debug(f"Request returned : {response.__dict__}")
     if response.status_code != 200:
+      logger.warning(f"Request returned with code {response.status_code} because of {response.reason}")
       return
+    logger.debug(f"Request returned with code {response.status_code}")
     if not self.yahoo_finance_quote:
       return
     result = response.text

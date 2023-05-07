@@ -3,6 +3,15 @@ from datetime import date
 from flask import Flask, request, render_template
 from src.DataFetcher import fetchDataForTickerSymbol
 
+logger = logging.getLogger("IsThisStockGood")
+
+handler = logging.StreamHandler()
+handler.setLevel(logging.WARNING)
+
+h_format = logging.Formatter('%(name)s - %(levelname)s : %(message)s')
+handler.setFormatter(h_format)
+
+logger.addHandler(handler)
 
 app = Flask(__name__)
 
@@ -32,4 +41,5 @@ def search():
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8080, debug=True)
+  app.run(host='127.0.0.1', port=8080, debug=True)
+  

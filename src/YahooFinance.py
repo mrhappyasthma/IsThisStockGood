@@ -9,7 +9,7 @@ class YahooFinanceQuote:
   # Expects the ticker symbol as the only argument.
   # This can theoretically request multiple comma-separated symbols.
   # This could theoretically be trimmed down by using `fields=` parameter.
-  URL_TEMPLATE = 'https://query1.finance.yahoo.com/v7/finance/quote?symbols={}'
+  URL_TEMPLATE = 'https://query1.finance.yahoo.com/v6/finance/quote?symbols={}'
 
   @classmethod
   def _construct_url(cls, ticker_symbol):
