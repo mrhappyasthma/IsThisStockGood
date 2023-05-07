@@ -24,6 +24,9 @@ class Color {
 // Attach a submit handler to the form.
 $(document).ready(function() {
   $("#searchboxform").submit(function(event) {
+
+    const loader = document.querySelector("popup-loading");
+
     // Stop form from submitting normally.
     event.preventDefault();
 
@@ -36,6 +39,9 @@ $(document).ready(function() {
     if ($ticker.length == 0) {
       return;
     }
+
+    // Start loading
+    loader.show();
 
     // Post the data to the path.
     let posting = $.post(path, { ticker: $ticker } );
@@ -107,6 +113,9 @@ $(document).ready(function() {
       colorCellWithBackgroundColor('#average_volume', averageVolumeColor);
       let sharesToHold = Math.round(averageVolume * 0.01).toLocaleString('en', {useGrouping:true});
       $('#shares_to_hold').html(sharesToHold);  // 1% of volume
+
+      // Hide loading
+      loader.hide();
     });
   });
 });
