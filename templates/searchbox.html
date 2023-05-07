@@ -11,25 +11,25 @@
             onkeydown="return validateInput(event)"/>
       </div>
       <div class="col-md-1 nopadding">
-        <button
+        <input
             type="submit"
+            value="Analyze"
             class="btn btn-raised btn-md btn-warning"
-        >Analyze</button>
+        >
       </div>
     </div>
   </form>
 </div>
 
 <script>
-  // Returns `true` if the key is an alphabetic keystroke or the backspace
-  // key.
-  function validateInput(event) {
-    let key = event.keyCode;
-    const backspaceKey = 8;
-    const periodKey = 190;
-    return ((key >= 65 && key <= 90) || key == backspaceKey || key == periodKey);
-  };
+document.querySelector("#ticker").addEventListener("keypress", (event) => {
+  let key = event.key;
+  if (!key.match(/[A-Za-z,.\-]/)) {
+      event.preventDefault();
+    }
+});
 </script>
+
 <script>
   {% include "js/search.js" %}
 </script>
