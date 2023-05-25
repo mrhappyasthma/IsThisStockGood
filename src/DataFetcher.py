@@ -1,4 +1,5 @@
 import random
+import requests
 import logging
 import src.RuleOneInvestingCalculations as RuleOne
 from requests_futures.sessions import FuturesSession
@@ -229,9 +230,18 @@ class DataFetcher():
   def fetch_yahoo_finance_quote(self):
     self.yahoo_finance_quote = YahooFinanceQuote(self.ticker_symbol)
     session = self._create_session()
+    # set_cookie = requests.get("https://fc.yahoo.com", allow_redirects=True)
+    # cookie = {"A3": "=d=AQABBDIjb2QCEP6Yfv8deeHPmCkMOJPr4LYFEgEBAQF0cGR5ZO-V7L8A_eMAAA&S=AQAAAtfWKlJiCqSO9jMVNukiJs8"}
+    # print(set_cookie.cookies)
+    # crumb = requests.get("https://query2.finance.yahoo.com/v1/test/getcrumb", cookies=set_cookie.cookies)
+    # print(crumb.headers)
+    # print(crumb.__dict__)
     rpc = session.get(self.yahoo_finance_quote.url, allow_redirects=True, hooks={
-       'response': self.parse_yahoo_finance_quote,
+      'response': self.parse_yahoo_finance_quote,
     })
+    
+    # session = requests.Session()
+    # cookies = dict(cookies_are='working')
     self.rpcs.append(rpc)
 
   # Called asynchronously upon completion of the URL fetch from
