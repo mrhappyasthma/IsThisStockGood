@@ -46,6 +46,16 @@ $(document).ready(function() {
     // Post the data to the path.
     let posting = $.post(path, { ticker: $ticker } );
 
+    posting.fail(function(response) {
+    $.snackbar({
+          content: `There was an error. Code ${response.status}`,
+          style: 'toast',
+          timeout: 3500
+        });
+        // Hide loading
+        loader.hide();
+        return;
+    })
     // Update the HTML with the results.
     posting.done(function(json_data) {
       data = JSON.parse(json_data);
@@ -55,6 +65,8 @@ $(document).ready(function() {
           style: 'toast',
           timeout: 3500
         });
+        // Hide loading
+        loader.hide();
         return;
       }
 
