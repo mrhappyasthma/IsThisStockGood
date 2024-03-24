@@ -2,3 +2,4 @@ Flask==2.3.2
 lxml
 #numpy==1.6.1
 requests-futures==1.0.0
+virtualenv
