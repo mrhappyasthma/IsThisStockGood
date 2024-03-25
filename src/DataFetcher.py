@@ -57,6 +57,7 @@ def fetchDataForTickerSymbol(ticker):
   template_values = {
     'ticker' : ticker,
     'name' : msn_money.name if msn_money and msn_money.name else 'null',
+    'description': msn_money.description if msn_money and msn_money.description else 'null',
     'roic': msn_money.roic_averages if msn_money and msn_money.roic_averages else [],
     'eps': msn_money.eps_growth_rates if msn_money and msn_money.eps_growth_rates else [],
     'sales': msn_money.revenue_growth_rates if msn_money and msn_money.revenue_growth_rates else [],

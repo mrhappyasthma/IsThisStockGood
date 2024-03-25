@@ -9,6 +9,7 @@ class MSNMoney:
   def __init__(self, ticker_symbol):
     self.ticker_symbol = ticker_symbol.replace('.', '')
     self.name = ''
+    self.description = ''
     self.industry = ''
     self.pe_high = None
     self.pe_low = None
@@ -38,9 +39,10 @@ class MSNMoney:
   def extract_stock_id(self, content):
     data = json.loads(content)
     for ticker in data.get('data', {}).get('stocks', []):
-        js = json.loads(ticker)
-        if js.get('RT00S', '').upper() == self.ticker_symbol.upper():
-            return js.get('SecId', '')
+      js = json.loads(ticker)
+      if js.get('RT00S', '').upper() == self.ticker_symbol.upper():
+        self.description = js.get('Description', '')
+        return js.get('SecId', '')
 
   def parse_data(self, content):
     json_content = json.loads(content);

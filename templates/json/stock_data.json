@@ -1,6 +1,7 @@
 {
   "ticker" : "{{ ticker }}",
   "name" : "{{ name }}",
+  "description": "{{ description }}",
   "roic" : {{ roic }},
   "eps" : {{ eps }},
   "sales" : {{ sales }},

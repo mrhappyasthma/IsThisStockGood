@@ -75,6 +75,11 @@ $(document).ready(function() {
         let baseWebsiteTitle = document.title.split('?')[0] + '?';
         document.title = baseWebsiteTitle + ' - ' + data.ticker.toUpperCase();
       }
+	  
+	  // Update the "meaning" description
+	  if (data.description) {
+		$('#meaning').html(data.description);
+	  }
 
       // Update moat numbers.
       updateBigFiveHtmlWithDataForKey(data, 'eps');
