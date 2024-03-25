@@ -53,8 +53,6 @@ def fetchDataForTickerSymbol(ticker):
   msn_money = data_fetcher.msn_money
   yahoo_finance_chart = data_fetcher.yahoo_finance_chart
   yahoo_finance_analysis = data_fetcher.yahoo_finance_analysis
-  if not msn_money or not yahoo_finance_chart or not yahoo_finance_analysis:
-    return None
   # TODO: Use TTM EPS instead of most recent year
   margin_of_safety_price, sticker_price = \
       _calculateMarginOfSafetyPrice(msn_money.equity_growth_rates[-1], msn_money.pe_low, msn_money.pe_high, msn_money.eps[-1], yahoo_finance_analysis.five_year_growth_rate)
@@ -92,7 +90,6 @@ def _calculateMarginOfSafetyPrice(one_year_equity_growth_rate, pe_low, pe_high, 
   if not one_year_equity_growth_rate or not pe_low or not pe_high or not ttm_eps or not analyst_five_year_growth_rate:
     return None, None
 
-  print(f"growthrate: {one_year_equity_growth_rate} pelow: {pe_low} pehigh: {pe_high} ttm_eps: {ttm_eps} analyst: {analyst_five_year_growth_rate}", flush=True)
   growth_rate = _calculate_growth_rate_decimal(analyst_five_year_growth_rate, one_year_equity_growth_rate)
   margin_of_safety_price, sticker_price = \
       RuleOne.margin_of_safety_price(float(ttm_eps), growth_rate, float(pe_low), float(pe_high))
@@ -125,6 +122,7 @@ class DataFetcher():
     self.rpcs = []
     self.ticker_symbol = ''
     self.msn_money = None
+    self.yahoo_finance_analysis = None
     self.yahoo_finance_chart = None
     self.error = False
 
