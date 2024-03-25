@@ -4,7 +4,6 @@ import src.RuleOneInvestingCalculations as RuleOne
 from requests_futures.sessions import FuturesSession
 from src.Active.MSNMoney import MSNMoney
 from src.Active.YahooFinance import YahooFinanceAnalysis
-from src.Active.YahooFinanceChart import YahooFinanceChart
 from threading import Lock
 
 logger = logging.getLogger("IsThisStockGood")
@@ -43,7 +42,6 @@ def fetchDataForTickerSymbol(ticker):
   # the json results.
   data_fetcher.fetch_msn_money_data()
   data_fetcher.fetch_yahoo_finance_analysis()
-  data_fetcher.fetch_yahoo_finance_chart()
 
 
   # Wait for each RPC result before proceeding.
@@ -51,12 +49,14 @@ def fetchDataForTickerSymbol(ticker):
     rpc.result()
 
   msn_money = data_fetcher.msn_money
-  yahoo_finance_chart = data_fetcher.yahoo_finance_chart
   yahoo_finance_analysis = data_fetcher.yahoo_finance_analysis
+  # NOTE: Some stocks won't have analyst growth rates, such as newly listed stocks or some foreign stocks.
+  five_year_growth_rate = yahoo_finance_analysis.five_year_growth_rate if yahoo_finance_analysis else 0
   # TODO: Use TTM EPS instead of most recent year
   margin_of_safety_price, sticker_price = \
-      _calculateMarginOfSafetyPrice(msn_money.equity_growth_rates[-1], msn_money.pe_low, msn_money.pe_high, msn_money.eps[-1], yahoo_finance_analysis.five_year_growth_rate)
-  payback_time = -9999999 #_calculatePaybackTime(msn_money, yahoo_finance_quote, yahoo_finance_analysis)
+      _calculateMarginOfSafetyPrice(msn_money.equity_growth_rates[-1], msn_money.pe_low, msn_money.pe_high, msn_money.eps[-1], five_year_growth_rate)
+  payback_time = _calculatePaybackTime(msn_money.equity_growth_rates[-1], msn_money.last_year_net_income, msn_money.market_cap, five_year_growth_rate)
+  computed_free_cash_flow = round(float(msn_money.free_cash_flow[-1]) * msn_money.shares_outstanding)
   template_values = {
     'ticker' : ticker,
     'name' : msn_money.name if msn_money and msn_money.name else 'null',
@@ -66,16 +66,15 @@ def fetchDataForTickerSymbol(ticker):
     'sales': msn_money.revenue_growth_rates if msn_money and msn_money.revenue_growth_rates else [],
     'equity': msn_money.equity_growth_rates if msn_money and msn_money.equity_growth_rates else [],
     'cash': msn_money.free_cash_flow_growth_rates if msn_money and msn_money.free_cash_flow_growth_rates else [],
-    # TODO: Figure out how to get long-term debt instead of total debt
-    'total_debt' : -9999999, #msn_money.total_debt,
-    'free_cash_flow' : -9999999, #msn_money.recent_free_cash_flow,
-    'debt_payoff_time' : -9999999, #: msn_money.debt_payoff_time,
+    'total_debt' : msn_money.total_debt,
+    'free_cash_flow' : computed_free_cash_flow,
+    'debt_payoff_time' : round(float(msn_money.total_debt) / computed_free_cash_flow),
     'debt_equity_ratio' : msn_money.debt_equity_ratio if msn_money and msn_money.debt_equity_ratio >= 0 else -1,
     'margin_of_safety_price' : margin_of_safety_price if margin_of_safety_price else 'null',
-    'current_price' : yahoo_finance_chart.current_price if yahoo_finance_chart and yahoo_finance_chart.current_price else 'null',
+    'current_price' : msn_money.current_price if msn_money and msn_money.current_price else 'null',
     'sticker_price' : sticker_price if sticker_price else 'null',
     'payback_time' : payback_time if payback_time else 'null',
-    'average_volume' : -9999999 #yahoo_finance_quote.average_volume if yahoo_finance_quote and yahoo_finance_quote.average_volume else 'null'
+    'average_volume' : msn_money.average_volume if msn_money and msn_money.average_volume else 'null'
   }
   return template_values
 
@@ -154,21 +153,48 @@ class DataFetcher():
     msn_stock_id = self.msn_money.extract_stock_id(response.text)
     session = self._create_session()
     rpc = session.get(self.msn_money.get_key_ratios_url(msn_stock_id), allow_redirects=True, hooks={
-       'response': self.parse_msn_money_data,
+       'response': self.parse_msn_money_ratios_data,
+    })
+    self.rpcs.append(rpc)
+    rpc = session.get(self.msn_money.get_quotes_url(msn_stock_id), allow_redirects=True, hooks={
+       'response': self.parse_msn_money_quotes_data,
+    })
+    self.rpcs.append(rpc)
+    rpc = session.get(self.msn_money.get_annual_statements_url(msn_stock_id), allow_redirects=True, hooks={
+       'response': self.parse_msn_money_annual_statement_data,
     })
     self.rpcs.append(rpc)
 
   # Called asynchronously upon completion of the URL fetch from
   # `fetch_msn_money_data` and `continue_fetching_msn_money_data`.
-  def parse_msn_money_data(self, response, *args, **kwargs):
+  def parse_msn_money_ratios_data(self, response, *args, **kwargs):
     if response.status_code != 200:
       return
     if not self.msn_money:
       return
     result = response.text
-    success = self.msn_money.parse_data(result)
-    if not success:
-      self.pe_ratios = None
+    self.msn_money.parse_ratios_data(result)
+
+
+  # Called asynchronously upon completion of the URL fetch from
+  # `fetch_msn_money_data` and `continue_fetching_msn_money_data`.
+  def parse_msn_money_quotes_data(self, response, *args, **kwargs):
+    if response.status_code != 200:
+      return
+    if not self.msn_money:
+      return
+    result = response.text
+    self.msn_money.parse_quotes_data(result)
+
+  # Called asynchronously upon completion of the URL fetch from
+  # `fetch_msn_money_data` and `continue_fetching_msn_money_data`.
+  def parse_msn_money_annual_statement_data(self, response, *args, **kwargs):
+    if response.status_code != 200:
+      return
+    if not self.msn_money:
+      return
+    result = response.text
+    self.msn_money.parse_annual_report_data(result)
 
   def fetch_yahoo_finance_analysis(self):
     self.yahoo_finance_analysis = YahooFinanceAnalysis(self.ticker_symbol)
