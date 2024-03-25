@@ -4,67 +4,6 @@ import logging
 import re
 from lxml import html
 
-
-class YahooFinanceQuote:
-  # Expects the ticker symbol as the only argument.
-  # This can theoretically request multiple comma-separated symbols.
-  # This could theoretically be trimmed down by using `fields=` parameter.
-  URL_TEMPLATE = 'https://query1.finance.yahoo.com/v6/finance/quote?symbols={}'
-
-  @classmethod
-  def _construct_url(cls, ticker_symbol):
-    return YahooFinanceQuote.URL_TEMPLATE.format(ticker_symbol)
-
-  def __init__(self, ticker_symbol):
-    self.ticker_symbol = ticker_symbol.replace('.', '-')
-    self.url = YahooFinanceQuote._construct_url(self.ticker_symbol)
-    self.current_price = None
-    self.market_cap = None
-    self.name = None
-    self.average_volume = None
-    self.ttm_eps = None
-
-  def parse_quote(self, content):
-    data = json.loads(content)
-    results = data.get('quoteResponse', {}).get('result', [])
-    if not results:
-      return False
-    success = self._parse_current_price(results)
-    success = success and self._parse_market_cap(results)
-    success = success and self._parse_name(results)
-    success = success and self._parse_average_volume(results)
-    success = success and self._parse_ttm_eps(results)
-    return success
-
-  def _parse_current_price(self, results):
-    if results:
-      self.current_price = results[0].get('regularMarketPrice', None)
-    return True if self.current_price else False
-
-  def _parse_market_cap(self, results):
-    if results:
-      self.market_cap = results[0].get('marketCap', None)
-    return True if self.market_cap else False
-
-  def _parse_name(self, results):
-    if results:
-      self.name = results[0].get('longName', None)
-    return True if self.name else False
-
-  def _parse_average_volume(self, results):
-    if results:
-      regularMarketVolume = results[0].get('regularMarketVolume', -1)
-      averageDailyVolume3Month = results[0].get('averageDailyVolume3Month', -1)
-      averageDailyVolume10Day = results[0].get('averageDailyVolume10Day', -1)
-      self.average_volume = max(0, min(regularMarketVolume, averageDailyVolume3Month, averageDailyVolume10Day))
-    return True if self.average_volume else False
-    
-  def _parse_ttm_eps(self, results):
-    if results:
-      self.ttm_eps = results[0].get('epsTrailingTwelveMonths', None)
-    return True if self.ttm_eps else False
-
-
 class YahooFinanceAnalysis:
   URL_TEMPLATE = 'https://finance.yahoo.com/quote/{}/analysis?p={}'
 
@@ -139,6 +78,7 @@ class YahooFinanceQuoteSummary:
   # Expects the ticker symbol as the first format string, and a comma-separated list
   # of `QuotesummaryModules` strings for the second argument.
   _URL_TEMPLATE = 'https://query1.finance.yahoo.com/v10/finance/quoteSummary/{}?modules={}'
+  _CRUMB_URL = 'https://query1.finance.yahoo.com/v1/test/getcrumb'
 
   # A list of modules that can be used inside of `QUOTE_SUMMARY_URL_TEMPLATE`.
   # These should be passed as a comma-separated list.
@@ -191,6 +131,7 @@ class YahooFinanceQuoteSummary:
     self.modules = [self._MODULES[module] for module in modules]
     self.url = YahooFinanceQuoteSummary._construct_url(ticker_symbol, self.modules)
     self.module_data = {}
+    self.crumb = None
 
   def parse_modules(self, content):
     """Parses all the of the module responses from the json into a top-level dictionary."""

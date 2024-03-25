@@ -3,6 +3,7 @@ import logging
 import src.RuleOneInvestingCalculations as RuleOne
 from requests_futures.sessions import FuturesSession
 from src.Active.MSNMoney import MSNMoney
+from src.Active.YahooFinance import YahooFinanceAnalysis
 from src.Active.YahooFinanceChart import YahooFinanceChart
 from threading import Lock
 
@@ -41,6 +42,7 @@ def fetchDataForTickerSymbol(ticker):
   # Make all network request asynchronously to build their portion of
   # the json results.
   data_fetcher.fetch_msn_money_data()
+  data_fetcher.fetch_yahoo_finance_analysis()
   data_fetcher.fetch_yahoo_finance_chart()
 
 
@@ -50,9 +52,12 @@ def fetchDataForTickerSymbol(ticker):
 
   msn_money = data_fetcher.msn_money
   yahoo_finance_chart = data_fetcher.yahoo_finance_chart
-  if not msn_money or not yahoo_finance_chart:
+  yahoo_finance_analysis = data_fetcher.yahoo_finance_analysis
+  if not msn_money or not yahoo_finance_chart or not yahoo_finance_analysis:
     return None
-  margin_of_safety_price, sticker_price = -999999, -99999#_calculateMarginOfSafetyPrice(msn_money, pe_ratios, yahoo_finance_quote, yahoo_finance_analysis)
+  # TODO: Use TTM EPS instead of most recent year
+  margin_of_safety_price, sticker_price = \
+      _calculateMarginOfSafetyPrice(msn_money.equity_growth_rates[-1], msn_money.pe_low, msn_money.pe_high, msn_money.eps[-1], yahoo_finance_analysis.five_year_growth_rate)
   payback_time = -9999999 #_calculatePaybackTime(msn_money, yahoo_finance_quote, yahoo_finance_analysis)
   template_values = {
     'ticker' : ticker,
@@ -76,40 +81,31 @@ def fetchDataForTickerSymbol(ticker):
   }
   return template_values
 
-def _calculateMarginOfSafetyPrice(key_stats, pe_ratios, yahoo_finance_quote, yahoo_finance_analysis):
-  if not key_stats or not pe_ratios or not yahoo_finance_analysis:
-    return None, None
 
-  if not yahoo_finance_analysis.five_year_growth_rate or not key_stats.equity_growth_rates:
-    return None, None
-  growth_rate = min(float(yahoo_finance_analysis.five_year_growth_rate),
-                    float(key_stats.equity_growth_rates[-1]))
+def _calculate_growth_rate_decimal(analyst_growth_rate, current_growth_rate):
+  growth_rate = min(float(analyst_growth_rate), float(current_growth_rate))
   # Divide the growth rate by 100 to convert from percent to decimal.
-  growth_rate = growth_rate / 100.0
+  return growth_rate / 100.0
 
-  if not yahoo_finance_quote or not yahoo_finance_quote.ttm_eps or not pe_ratios.pe_low or not pe_ratios.pe_high:
+
+def _calculateMarginOfSafetyPrice(one_year_equity_growth_rate, pe_low, pe_high, ttm_eps, analyst_five_year_growth_rate):
+  if not one_year_equity_growth_rate or not pe_low or not pe_high or not ttm_eps or not analyst_five_year_growth_rate:
     return None, None
+
+  print(f"growthrate: {one_year_equity_growth_rate} pelow: {pe_low} pehigh: {pe_high} ttm_eps: {ttm_eps} analyst: {analyst_five_year_growth_rate}", flush=True)
+  growth_rate = _calculate_growth_rate_decimal(analyst_five_year_growth_rate, one_year_equity_growth_rate)
   margin_of_safety_price, sticker_price = \
-      RuleOne.margin_of_safety_price(float(yahoo_finance_quote.ttm_eps), growth_rate,
-                                     float(pe_ratios.pe_low), float(pe_ratios.pe_high))
+      RuleOne.margin_of_safety_price(float(ttm_eps), growth_rate, float(pe_low), float(pe_high))
   return margin_of_safety_price, sticker_price
 
 
-def _calculatePaybackTime(key_stats, yahoo_finance_quote, yahoo_finance_analysis):
-  if not key_stats or not yahoo_finance_quote or not yahoo_finance_analysis:
+# TODO: Figure out how to get TTM net income instead of previous year net income.
+def _calculatePaybackTime(one_year_equity_growth_rate, last_year_net_income, market_cap, analyst_five_year_growth_rate):
+  if not one_year_equity_growth_rate or not last_year_net_income or not market_cap or not analyst_five_year_growth_rate:
     return None
 
-  if not yahoo_finance_analysis.five_year_growth_rate or not key_stats.equity_growth_rates:
-    return None
-  growth_rate = min(float(yahoo_finance_analysis.five_year_growth_rate),
-                    float(key_stats.equity_growth_rates[-1]))
-  # Divide the growth rate by 100 to convert from percent to decimal.
-  growth_rate = growth_rate / 100.0
-
-  # TODO: Figure out how to get TTM net income instead of previous year net income.
-  if not key_stats.last_year_net_income or not yahoo_finance_quote.market_cap:
-    return None
-  payback_time = RuleOne.payback_time(yahoo_finance_quote.market_cap, key_stats.last_year_net_income, growth_rate)
+  growth_rate = _calculate_growth_rate_decimal(analyst_five_year_growth_rate, one_year_equity_growth_rate)
+  payback_time = RuleOne.payback_time(market_cap, last_year_net_income, growth_rate)
   return payback_time
 
 
@@ -175,6 +171,26 @@ class DataFetcher():
     success = self.msn_money.parse_data(result)
     if not success:
       self.pe_ratios = None
+
+  def fetch_yahoo_finance_analysis(self):
+    self.yahoo_finance_analysis = YahooFinanceAnalysis(self.ticker_symbol)
+    session = self._create_session()
+    rpc = session.get(self.yahoo_finance_analysis.url, allow_redirects=True, hooks={
+       'response': self.parse_yahoo_finance_analysis,
+    })
+    self.rpcs.append(rpc)
+
+  # Called asynchronously upon completion of the URL fetch from
+  # `fetch_yahoo_finance_analysis`.
+  def parse_yahoo_finance_analysis(self, response, *args, **kwargs):
+    if response.status_code != 200:
+      return
+    if not self.yahoo_finance_analysis:
+      return
+    result = response.text
+    success = self.yahoo_finance_analysis.parse_analyst_five_year_growth_rate(result)
+    if not success:
+      self.yahoo_finance_analysis = None
 
   def fetch_yahoo_finance_chart(self):
     self.yahoo_finance_chart = YahooFinanceChart(self.ticker_symbol)
