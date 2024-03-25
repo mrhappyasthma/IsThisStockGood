@@ -44,6 +44,7 @@ class StockRowKeyStats:
 
   def parse_json_data(self, data):
     try:
+      print(data)
       json_data = json.loads(data)
       data_dict = {}
       rows = json_data.get("fundamentals", {}).get("rows", [])
@@ -97,7 +98,7 @@ class StockRowKeyStats:
       
       total_debts = _get_nested_values_for_key(data_dict, "Total Debt") # Already in USD millions
       self.calculate_total_debt(total_debts)
-    except Exception as e:
+    except ValueError:
       logging.error(traceback.format_exc())
       return False
     return True

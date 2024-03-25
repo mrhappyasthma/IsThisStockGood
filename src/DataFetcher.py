@@ -2,11 +2,8 @@ import random
 import logging
 import src.RuleOneInvestingCalculations as RuleOne
 from requests_futures.sessions import FuturesSession
-from src.MSNMoney import MSNMoney
-from src.StockRow import StockRowKeyStats
-from src.YahooFinance import YahooFinanceAnalysis
-from src.YahooFinance import YahooFinanceQuote
-from src.YahooFinance import YahooFinanceQuoteSummary, YahooFinanceQuoteSummaryModule
+from src.Active.MSNMoney import MSNMoney
+from src.Active.YahooFinanceChart import YahooFinanceChart
 from threading import Lock
 
 logger = logging.getLogger("IsThisStockGood")
@@ -43,43 +40,38 @@ def fetchDataForTickerSymbol(ticker):
 
   # Make all network request asynchronously to build their portion of
   # the json results.
-  data_fetcher.fetch_stockrow_key_stats()
-  data_fetcher.fetch_pe_ratios()
-  data_fetcher.fetch_yahoo_finance_analysis()
-  data_fetcher.fetch_yahoo_finance_quote()
-  data_fetcher.fetch_yahoo_finance_quote_summary()
+  data_fetcher.fetch_msn_money_data()
+  data_fetcher.fetch_yahoo_finance_chart()
 
 
   # Wait for each RPC result before proceeding.
   for rpc in data_fetcher.rpcs:
     rpc.result()
 
-  key_stats = data_fetcher.stockrow_key_stats
-  if not key_stats:
+  msn_money = data_fetcher.msn_money
+  yahoo_finance_chart = data_fetcher.yahoo_finance_chart
+  if not msn_money or not yahoo_finance_chart:
     return None
-  pe_ratios = data_fetcher.pe_ratios
-  yahoo_finance_analysis = data_fetcher.yahoo_finance_analysis
-  yahoo_finance_quote = data_fetcher.yahoo_finance_quote
-  margin_of_safety_price, sticker_price = _calculateMarginOfSafetyPrice(key_stats, pe_ratios, yahoo_finance_quote, yahoo_finance_analysis)
-  payback_time = _calculatePaybackTime(key_stats, yahoo_finance_quote, yahoo_finance_analysis)
+  margin_of_safety_price, sticker_price = -999999, -99999#_calculateMarginOfSafetyPrice(msn_money, pe_ratios, yahoo_finance_quote, yahoo_finance_analysis)
+  payback_time = -9999999 #_calculatePaybackTime(msn_money, yahoo_finance_quote, yahoo_finance_analysis)
   template_values = {
     'ticker' : ticker,
-    'name' : yahoo_finance_quote.name if yahoo_finance_quote and yahoo_finance_quote.name else 'null',
-    'roic': data_fetcher.get_roic_averages(),
-    'eps': key_stats.eps_growth_rates if key_stats.eps_growth_rates else [],
-    'sales': key_stats.revenue_growth_rates if key_stats.revenue_growth_rates else [],
-    'equity': key_stats.equity_growth_rates if key_stats.equity_growth_rates else [],
-    'cash': key_stats.free_cash_flow_growth_rates if key_stats.free_cash_flow_growth_rates else [],
+    'name' : msn_money.name if msn_money and msn_money.name else 'null',
+    'roic': msn_money.roic_averages if msn_money and msn_money.roic_averages else [],
+    'eps': msn_money.eps_growth_rates if msn_money and msn_money.eps_growth_rates else [],
+    'sales': msn_money.revenue_growth_rates if msn_money and msn_money.revenue_growth_rates else [],
+    'equity': msn_money.equity_growth_rates if msn_money and msn_money.equity_growth_rates else [],
+    'cash': msn_money.free_cash_flow_growth_rates if msn_money and msn_money.free_cash_flow_growth_rates else [],
     # TODO: Figure out how to get long-term debt instead of total debt
-    'total_debt' : key_stats.total_debt,
-    'free_cash_flow' : key_stats.recent_free_cash_flow,
-    'debt_payoff_time' : key_stats.debt_payoff_time,
-    'debt_equity_ratio' : key_stats.debt_equity_ratio if key_stats.debt_equity_ratio >= 0 else -1,
+    'total_debt' : -9999999, #msn_money.total_debt,
+    'free_cash_flow' : -9999999, #msn_money.recent_free_cash_flow,
+    'debt_payoff_time' : -9999999, #: msn_money.debt_payoff_time,
+    'debt_equity_ratio' : msn_money.debt_equity_ratio if msn_money and msn_money.debt_equity_ratio >= 0 else -1,
     'margin_of_safety_price' : margin_of_safety_price if margin_of_safety_price else 'null',
-    'current_price' : yahoo_finance_quote.current_price if yahoo_finance_quote and yahoo_finance_quote.current_price else 'null',
+    'current_price' : yahoo_finance_chart.current_price if yahoo_finance_chart and yahoo_finance_chart.current_price else 'null',
     'sticker_price' : sticker_price if sticker_price else 'null',
     'payback_time' : payback_time if payback_time else 'null',
-    'average_volume' : yahoo_finance_quote.average_volume if yahoo_finance_quote and yahoo_finance_quote.average_volume else 'null'
+    'average_volume' : -9999999 #yahoo_finance_quote.average_volume if yahoo_finance_quote and yahoo_finance_quote.average_volume else 'null'
   }
   return template_values
 
@@ -135,11 +127,8 @@ class DataFetcher():
     self.lock = Lock()
     self.rpcs = []
     self.ticker_symbol = ''
-    self.stockrow_key_stats = None
-    self.pe_ratios = None
-    self.yahoo_finance_analysis = None
-    self.yahoo_finance_quote = None
-    self.yahoo_finance_quote_summary = None
+    self.msn_money = None
+    self.yahoo_finance_chart = None
     self.error = False
 
   def _create_session(self):
@@ -149,188 +138,59 @@ class DataFetcher():
     })
     return session
 
-  def fetch_stockrow_key_stats(self):
-    self.stockrow_key_stats = StockRowKeyStats(self.ticker_symbol)
-    session = self._create_session()
-    key_stat_rpc = session.get(self.stockrow_key_stats.key_stat_url, hooks={
-       'response': self.parse_stockrow_key_stats,
-    })
-    self.rpcs.append(key_stat_rpc)
-
-  # Called asynchronously upon completion of the URL fetch from
-  # `fetch_stockrow_key_stats`.
-  def parse_stockrow_key_stats(self, response, *args, **kwargs):
-    self.lock.acquire()
-    if not self.stockrow_key_stats:
-      self.lock.release()
-      return
-    success = self.stockrow_key_stats.parse_json_data(response.content)
-    if not success:
-      self.stockrow_key_stats = None
-    self.lock.release()
-
-  def fetch_pe_ratios(self):
+  def fetch_msn_money_data(self):
     """
-    Fetching PE Ratios to calculate Sticker Price and Safety Margin Price
-    First we need to get an internal MSN stock id for a ticker
-    and then fetch PE Ratios.
+    Fetching PE Ratios to calculate Sticker Price and Safety Margin Price. As well as
+    the "Big 5" growth rate numbers.
+    First we need to get an internal MSN stock id for a ticker and then fetch the data.
     """
-    self.pe_ratios = MSNMoney(self.ticker_symbol)
+    self.msn_money = MSNMoney(self.ticker_symbol)
     session = self._create_session()
-    rpc = session.get(self.pe_ratios.get_ticker_autocomplete_url(), allow_redirects=True, hooks={
-       'response': self.continue_fetching_pe_ratios,
+    rpc = session.get(self.msn_money.get_ticker_autocomplete_url(), allow_redirects=True, hooks={
+       'response': self.continue_fetching_msn_money_data,
     })
     self.rpcs.append(rpc)
 
-  def continue_fetching_pe_ratios(self, response, *args, **kwargs):
+  def continue_fetching_msn_money_data(self, response, *args, **kwargs):
     """
-    After msn_stock_id was fetched in fetch_pe_ratios method
-    we can now get the financials
+    After msn_stock_id was fetched in fetch_msn_money_data method
+    we can now get the financials.
     """
-    msn_stock_id = self.pe_ratios.extract_stock_id(response.text)
+    msn_stock_id = self.msn_money.extract_stock_id(response.text)
     session = self._create_session()
-    rpc = session.get(self.pe_ratios.get_key_ratios_url(msn_stock_id), allow_redirects=True, hooks={
-       'response': self.parse_pe_ratios,
+    rpc = session.get(self.msn_money.get_key_ratios_url(msn_stock_id), allow_redirects=True, hooks={
+       'response': self.parse_msn_money_data,
     })
     self.rpcs.append(rpc)
 
   # Called asynchronously upon completion of the URL fetch from
-  # `fetch_pe_ratios` and `continue_fetching_pe_ratios`.
-  def parse_pe_ratios(self, response, *args, **kwargs):
+  # `fetch_msn_money_data` and `continue_fetching_msn_money_data`.
+  def parse_msn_money_data(self, response, *args, **kwargs):
     if response.status_code != 200:
       return
-    if not self.pe_ratios:
+    if not self.msn_money:
       return
     result = response.text
-    success = self.pe_ratios.parse_pe_ratios(result)
+    success = self.msn_money.parse_data(result)
     if not success:
       self.pe_ratios = None
 
-  def fetch_yahoo_finance_analysis(self):
-    self.yahoo_finance_analysis = YahooFinanceAnalysis(self.ticker_symbol)
+  def fetch_yahoo_finance_chart(self):
+    self.yahoo_finance_chart = YahooFinanceChart(self.ticker_symbol)
     session = self._create_session()
-    rpc = session.get(self.yahoo_finance_analysis.url, allow_redirects=True, hooks={
-       'response': self.parse_yahoo_finance_analysis,
+    rpc = session.get(self.yahoo_finance_chart.url, allow_redirects=True, hooks={
+       'response': self.parse_yahoo_finance_chart,
     })
     self.rpcs.append(rpc)
 
   # Called asynchronously upon completion of the URL fetch from
   # `fetch_yahoo_finance_analysis`.
-  def parse_yahoo_finance_analysis(self, response, *args, **kwargs):
+  def parse_yahoo_finance_chart(self, response, *args, **kwargs):
     if response.status_code != 200:
       return
-    if not self.yahoo_finance_analysis:
+    if not self.yahoo_finance_chart:
       return
     result = response.text
-    success = self.yahoo_finance_analysis.parse_analyst_five_year_growth_rate(result)
+    success = self.yahoo_finance_chart.parse_chart(result)
     if not success:
-      self.yahoo_finance_analysis = None
-
-  def fetch_yahoo_finance_quote(self):
-    self.yahoo_finance_quote = YahooFinanceQuote(self.ticker_symbol)
-    session = self._create_session()
-    rpc = session.get(self.yahoo_finance_quote.url, allow_redirects=True, hooks={
-       'response': self.parse_yahoo_finance_quote,
-    })
-    self.rpcs.append(rpc)
-
-  # Called asynchronously upon completion of the URL fetch from
-  # `fetch_yahoo_finance_quote`.
-  def parse_yahoo_finance_quote(self, response, *args, **kwargs):
-    logger.debug(f"Request returned : {response.__dict__}")
-    if response.status_code != 200:
-      logger.warning(f"Request returned with code {response.status_code} because of {response.reason}")
-      return
-    logger.debug(f"Request returned with code {response.status_code}")
-    if not self.yahoo_finance_quote:
-      return
-    result = response.text
-    success = self.yahoo_finance_quote.parse_quote(result)
-    if not success:
-      self.yahoo_finance_quote = None
-
-  def fetch_yahoo_finance_quote_summary(self):
-    modules = [
-        YahooFinanceQuoteSummaryModule.incomeStatementHistory,
-        YahooFinanceQuoteSummaryModule.balanceSheetHistory
-    ]
-    self.yahoo_finance_quote_summary = YahooFinanceQuoteSummary(self.ticker_symbol, modules)
-    session = self._create_session()
-    rpc = session.get(self.yahoo_finance_quote_summary.url, allow_redirects=True, hooks={
-       'response': self.parse_yahoo_finance_quote_summary,
-    })
-    self.rpcs.append(rpc)
-
-  # Called asynchronously upon completion of the URL fetch from
-  # `fetch_yahoo_finance_quote_summary`.
-  def parse_yahoo_finance_quote_summary(self, response, *args, **kwargs):
-    if response.status_code != 200:
-      return
-    if not self.yahoo_finance_quote_summary:
-      return
-    result = response.text
-    success = self.yahoo_finance_quote_summary.parse_modules(result)
-    if not success:
-      self.yahoo_finance_quote_summary = None
-
-  def get_roic_averages(self):
-    """
-    Calculate ROIC averages for 1,3,5 and Max years
-    StockRow averages aren't accurate, so we're getting avgs for 1y and 3y from Yahoo
-    by calculating these by ouselves. The rest is from StockRow to at least have some (even
-    a bit inaccurate values), cause Yahoo has data for 4 years only.
-    """
-    roic_avgs = []
-    try:
-      roic_avgs.append(self.get_roic_average(years=1))
-    except AttributeError:
-      try:
-        roic_avgs.append(self.stockrow_key_stats.roic_averages[0])
-      except IndexError:
-        return []
-    try:
-      roic_avgs.append(self.get_roic_average(years=3))
-    except AttributeError:
-      try:
-        roic_avgs.append(self.stockrow_key_stats.roic_averages[1])
-      except IndexError:
-        return roic_avgs
-    try:
-      roic_avgs.append(self.stockrow_key_stats.roic_averages[2])
-      roic_avgs.append(self.stockrow_key_stats.roic_averages[3])
-    except IndexError:
-      pass
-    return roic_avgs
-
-  def _get_roic_history(self):
-    """
-    Calculates ROIC historial values based on annual financial statements.
-
-    net_income_history: Net Income (starts from the last annual statement)
-    cash_history: Cash (starts from the last annual statement)
-    long_term_debt_history: Long Term Debt (starts from the last annual statement)
-    stockholder_equity_history: Stockholder Equity (starts from the last annual statement)
-    """
-    net_income_history = self.yahoo_finance_quote_summary.get_income_statement_history('netIncome')
-    cash_history = self.yahoo_finance_quote_summary.get_balance_sheet_history('cash')
-    long_term_debt_history = self.yahoo_finance_quote_summary.get_balance_sheet_history(
-       'longTermDebt'
-    )
-    stockholder_equity_history = self.yahoo_finance_quote_summary.get_balance_sheet_history(
-       'totalStockholderEquity'
-    )
-    roic_history = []
-    for i in range(0, len(net_income_history)):
-      roic_history.append(
-        RuleOne.calculate_roic(
-          net_income_history[i], cash_history[i],
-          long_term_debt_history[i], stockholder_equity_history[i]
-        )
-      )
-    return roic_history
-
-  def get_roic_average(self, years):
-    history = self._get_roic_history()
-    if len(history[0:years]) < years:
-      raise AttributeError("Too few years in ROIC history")
-    return round(sum(history[0:years]) / years, 2)
+      self.yahoo_finance_chart = None
