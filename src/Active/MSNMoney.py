@@ -78,7 +78,7 @@ class MSNMoney:
     most_recent_statement = annual_statements[max(annual_statements.keys())]
     if not most_recent_statement:
       return
-    self.total_debt = str(float(most_recent_statement.get('liabilities', 0)) * 1000000)
+    self.total_debt = str(float(most_recent_statement.get('longTermDebt', 0)))
     self.shares_outstanding = float(most_recent_statement.get('sharesOutstanding', 0))
 
     key_metrics = data.get('analysis', {}).get('keyMetrics', {})
