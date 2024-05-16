@@ -161,7 +161,7 @@ class MSNMoney:
   def _parse_debt_to_equity(self, quarterly_data):
     # NOTE: ROIC is already expressed as a percentage, so just take the average over a timespan.
     debt_to_equity_ratios = _extract_data_for_key(quarterly_data, "debtToEquityRatio")
-    self.debt_equity_ratio = debt_to_equity_ratios[-1]  # Most recent quarter
+    self.debt_equity_ratio = debt_to_equity_ratios[-1] / 100  # Most recent quarter
 
 
 def _extract_data_for_key(yearly_data, key):
