@@ -20,6 +20,21 @@ def get_logger():
 def create_app(fetchDataForTickerSymbol):
     app = Flask(__name__)
 
+    @app.route('/api/ticker/nvda')
+    def api_ticker():
+      template_values = fetchDataForTickerSymbol("NVDA")
+
+      if not template_values:
+        data = render_template('json/error.json', **{'error' : 'Invalid ticker symbol'})
+      else:
+        data = render_template('json/stock_data.json', **template_values)
+
+      return app.response_class(
+        response=data,
+        status=200,
+        mimetype='application/json'
+    )
+
     @app.route('/api')
     def api():
       data = {}
