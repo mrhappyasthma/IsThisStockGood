@@ -1,4 +1,4 @@
-Flask==2.3.2
+Flask==3.0.3
 lxml
 #numpy==1.6.1
 requests-futures==1.0.0

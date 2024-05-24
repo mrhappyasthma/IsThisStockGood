@@ -7,9 +7,10 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-flask = "2.3.2"
-lxml = "4.9.1"
+flask = "3.0.3"
 requests-futures = "^1.0.1"
+wheel = "^0.43.0"
+lxml = "^5.2.2"
 
 
 [build-system]
