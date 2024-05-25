@@ -7,10 +7,11 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-flask = "3.0.3"
 requests-futures = "^1.0.1"
 wheel = "^0.43.0"
 lxml = "^5.2.2"
+flask = "3.0.3"
+virtualenv = "^20.26.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.1"
@@ -18,3 +19,6 @@ pytest = "^8.2.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pylint]
+indent-string="  "

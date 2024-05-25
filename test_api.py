@@ -1,5 +1,5 @@
 import json
-from .main import create_app
+from src.server import create_app
 from src.DataFetcher import fetchDataForTickerSymbol
 
 
