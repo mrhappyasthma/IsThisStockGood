@@ -1,6 +1,6 @@
 import json
 from .main import create_app
-from isthisstockgood.DataFetcher import fetchDataForTickerSymbol
+from src.DataFetcher import fetchDataForTickerSymbol
 
 
 def mock_fetch_data():

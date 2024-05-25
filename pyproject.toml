@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "isthisstockgood"
+name = "src"
 version = "0.1.0"
 description = ""
 authors = ["Patryk Kocielnik <patryk@kocielnik.pl>"]
