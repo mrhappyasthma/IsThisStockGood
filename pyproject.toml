@@ -6,7 +6,7 @@ authors = ["Patryk Kocielnik <patryk@kocielnik.pl>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 flask = "3.0.3"
 requests-futures = "^1.0.1"
 wheel = "^0.43.0"
