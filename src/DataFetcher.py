@@ -90,12 +90,6 @@ def _calculateMarginOfSafetyPrice(one_year_equity_growth_rate, pe_low, pe_high, 
     return None, None
 
   growth_rate = _calculate_growth_rate_decimal(analyst_five_year_growth_rate, one_year_equity_growth_rate)
-  print({
-    "ttm_eps": float(ttm_eps),
-    "growth_rate": growth_rate,
-    "pe_low": float(pe_low),
-    "pe_high": float(pe_high)
-  })
   margin_of_safety_price, sticker_price = \
       RuleOne.margin_of_safety_price(float(ttm_eps), growth_rate, float(pe_low), float(pe_high))
   return margin_of_safety_price, sticker_price
