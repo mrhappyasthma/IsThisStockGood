@@ -3,9 +3,6 @@ from src.server import create_app
 from src.DataFetcher import fetchDataForTickerSymbol
 
 
-def mock_fetch_data():
-    return {}
-
 def test_import_app():
     app = create_app(fetchDataForTickerSymbol)
 
