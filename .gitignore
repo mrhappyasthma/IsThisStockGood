@@ -4,3 +4,4 @@ env/
 
 # For Pycharm
 .idea
+.envrc
