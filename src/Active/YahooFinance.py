@@ -15,7 +15,7 @@ class YahooFinanceAnalysis:
   def _isPercentage(cls, text):
     if not isinstance(text, str):
       return False
-    match = re.match('(\d+(\.\d+)?%)', text)
+    match = re.match(r'(\d+(\.\d+)?%)', text)
     return match != None
 
   @classmethod
