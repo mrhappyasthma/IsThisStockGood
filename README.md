@@ -1,6 +1,6 @@
 # IsThisStockGood
 
-[![IsThisStockGood](https://circleci.com/gh/mrhappyasthma/IsThisStockGood.svg?style=shield)](https://app.circleci.com/pipelines/github/mrhappyasthma/IsThisStockGood)
+[![IsThisStockGood](https://github.com/mrhappyasthma/IsThisStockGood/actions/workflows/python-app.yml/badge.svg)](https://github.com/mrhappyasthma/IsThisStockGood/actions)
 
 [IsThisStockGood.com](http://www.isthisstockgood.com)
 
