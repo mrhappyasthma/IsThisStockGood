@@ -1,5 +1,5 @@
-from src.DataFetcher import fetchDataForTickerSymbol
-from src.server import create_app
+from isthisstockgood.DataFetcher import fetchDataForTickerSymbol
+from isthisstockgood.server import create_app
 
 
 if __name__ == '__main__':

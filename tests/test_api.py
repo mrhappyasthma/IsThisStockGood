@@ -1,6 +1,6 @@
 import json
-from src.server import create_app
-from src.DataFetcher import fetchDataForTickerSymbol
+from isthisstockgood.server import create_app
+from isthisstockgood.DataFetcher import fetchDataForTickerSymbol
 
 
 def test_import_app():
