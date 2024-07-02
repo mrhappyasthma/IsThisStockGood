@@ -1,5 +1,5 @@
 import json
-import src.RuleOneInvestingCalculations as RuleOne
+import isthisstockgood.RuleOneInvestingCalculations as RuleOne
 
 class MSNMoney:
   # This key appears to be fixed? So we can use it for now /shrug
