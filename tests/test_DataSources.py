@@ -8,12 +8,11 @@ def test_msn_money():
 
     data = get_msn_money_data(test_ticker)
 
-    assert data.current_price > 0.0
     assert data.ticker_symbol == test_ticker
     assert data.name == test_name
     assert data.description != ''
     assert data.industry != ''
-    assert data.current_price != 0.0
+    assert data.current_price > 0.0
     assert data.average_volume > 0
     assert data.market_cap > 0.0
     assert data.shares_outstanding > 0
@@ -33,6 +32,15 @@ def test_msn_money():
     assert data.last_year_net_income > 0.0
     assert data.total_debt >= 0.0
 
+def test_yahoo():
+    test_ticker = 'MSFT'
+    test_name = 'Microsoft Corp'
+
+    data = get_yahoo_data(test_ticker)
+
+    assert data.ticker_symbol == test_ticker
+    assert float(data.five_year_growth_rate) > 0.0
+
 def get_msn_money_data(ticker):
     data_fetcher = DataFetcher()
     data_fetcher.ticker_symbol = ticker
@@ -46,3 +54,17 @@ def get_msn_money_data(ticker):
       rpc.result()
 
     return CompanyInfo(**vars(data_fetcher.msn_money))
+
+def get_yahoo_data(ticker):
+    data_fetcher = DataFetcher()
+    data_fetcher.ticker_symbol = ticker
+
+    # Make all network request asynchronously to build their portion of
+    # the json results.
+    data_fetcher.fetch_yahoo_finance_analysis()
+
+    # Wait for each RPC result before proceeding.
+    for rpc in data_fetcher.rpcs:
+      rpc.result()
+
+    return data_fetcher.yahoo_finance_analysis
