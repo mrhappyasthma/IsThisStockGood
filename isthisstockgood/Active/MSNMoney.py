@@ -1,32 +1,6 @@
-from dataclasses import dataclass
 import json
 import isthisstockgood.RuleOneInvestingCalculations as RuleOne
 
-@dataclass
-class CompanyInfo:
-    ticker_symbol: str
-    name: str
-    description: str
-    industry: str
-    current_price: float
-    average_volume: float
-    market_cap: float
-    shares_outstanding: int
-    pe_high: float
-    pe_low: float
-    roic: float
-    roic_averages: [float]
-    equity: float
-    equity_growth_rates: [float]
-    free_cash_flow: float
-    free_cash_flow_growth_rates: [float]
-    revenue: float
-    revenue_growth_rates: [float]
-    eps: float
-    eps_growth_rates: [float]
-    debt_equity_ratio: float
-    last_year_net_income: float
-    total_debt: float
 
 
 class MSNMoney:
@@ -106,7 +80,7 @@ class MSNMoney:
     most_recent_statement = annual_statements[max(annual_statements.keys())]
     if not most_recent_statement:
       return
-    self.total_debt = str(float(most_recent_statement.get('longTermDebt', 0)))
+    self.total_debt = float(most_recent_statement.get('longTermDebt', 0))
     self.shares_outstanding = float(most_recent_statement.get('sharesOutstanding', 0))
 
     key_metrics = data.get('analysis', {}).get('keyMetrics', {})
@@ -120,7 +94,7 @@ class MSNMoney:
       return False
     
     self.name = json_content.get('displayName', '')
-    self.industy = json_content.get('industry', '')
+    self.industry = json_content.get('industry', '')
     
     # PE Ratios
     self._parse_pe_ratios(yearly_data)
