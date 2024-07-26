@@ -1,12 +1,7 @@
 """Tests for the MSNMoney.py functions."""
 
 
-import os
-import sys
 import unittest
-
-app_path = os.path.join(os.path.dirname(__file__), "..", 'isthisstockgood')
-sys.path.append(app_path)
 
 from isthisstockgood.Active.MSNMoney import MSNMoney
 

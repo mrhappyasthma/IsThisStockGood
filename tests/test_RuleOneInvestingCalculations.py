@@ -1,14 +1,9 @@
 """Tests for the app/RuleOneInvestingCalculations.py functions."""
 
 
-import os
-import sys
 import unittest
 
-app_path = os.path.join(os.path.dirname(__file__), "..", 'isthisstockgood')
-sys.path.append(app_path)
-
-import RuleOneInvestingCalculations as RuleOne
+import isthisstockgood.RuleOneInvestingCalculations as RuleOne
 
 class RuleOneInvestingCalculationsTest(unittest.TestCase):
 
