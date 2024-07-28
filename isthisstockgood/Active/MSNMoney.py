@@ -1,6 +1,8 @@
 import json
 import isthisstockgood.RuleOneInvestingCalculations as RuleOne
 
+
+
 class MSNMoney:
   # This key appears to be fixed? So we can use it for now /shrug
   _API_KEY = '0QfOX3Vn51YCzitbLaRkTTBadtWpgTN8NZLW0C1SEM'
@@ -78,7 +80,7 @@ class MSNMoney:
     most_recent_statement = annual_statements[max(annual_statements.keys())]
     if not most_recent_statement:
       return
-    self.total_debt = str(float(most_recent_statement.get('longTermDebt', 0)))
+    self.total_debt = float(most_recent_statement.get('longTermDebt', 0))
     self.shares_outstanding = float(most_recent_statement.get('sharesOutstanding', 0))
 
     key_metrics = data.get('analysis', {}).get('keyMetrics', {})
@@ -92,7 +94,7 @@ class MSNMoney:
       return False
     
     self.name = json_content.get('displayName', '')
-    self.industy = json_content.get('industry', '')
+    self.industry = json_content.get('industry', '')
     
     # PE Ratios
     self._parse_pe_ratios(yearly_data)
