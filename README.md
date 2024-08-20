@@ -34,7 +34,7 @@ This repository contains a script to iteratively issue a bulk fetch and populate
 2. Install python3, if you haven't already.
 3. Run the following command to install the dependencies:
 ```
-python3 -m pip install -r .
+python3 -m pip install .
 ```
 4. Run the `main.py` with:
 ```
