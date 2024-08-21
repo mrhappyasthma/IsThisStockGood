@@ -34,19 +34,9 @@ This repository contains a script to iteratively issue a bulk fetch and populate
 2. Install python3, if you haven't already.
 3. Run the following command to install the dependencies:
 ```
-python3 -m pip install -r requirements.txt
+python3 -m pip install .
 ```
-4. `cd` into the directory and create a `virtualenv` by running:
-```
-virtualenv flask
-```
-5. Run the following command:
-```
-source flask/Scripts/activate
-```
-You should now seek `(flask)` in your terminal prompt.
-    
-6. Run the `main.py` with:
+4. Run the `main.py` with:
 ```
 python3 main.py
 ```
