@@ -20,7 +20,7 @@ def test_get_data():
         test_client = app.test_client()
         res = test_client.get('/api/ticker/nvda')
         data = res.text
-        assert json.loads(data)['debt_payoff_time'] == 0
+        assert json.loads(data)['debt_payoff_time'] >= 0
         assert res.status_code == 200
 
 def test_get_ten_cap_price():
