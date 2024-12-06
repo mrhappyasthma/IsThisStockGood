@@ -15,5 +15,6 @@
   "current_price" : {{ current_price }},
   "sticker_price" : {{ sticker_price }},
   "payback_time" : {{ payback_time }},
+  "ten_cap_price" : {{ ten_cap_price }},
   "average_volume" : {{ average_volume }}
 }
