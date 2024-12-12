@@ -71,7 +71,7 @@ def fetchDataForTickerSymbol(ticker):
     'cash': msn_money.free_cash_flow_growth_rates if msn_money and msn_money.free_cash_flow_growth_rates else [],
     'total_debt' : msn_money.total_debt,
     'free_cash_flow' : computed_free_cash_flow,
-    'ten_cap_price' : ten_cap_price,
+    'ten_cap_price' : round(ten_cap_price, 2),
     'debt_payoff_time' : round(float(msn_money.total_debt) / computed_free_cash_flow),
     'debt_equity_ratio' : msn_money.debt_equity_ratio if msn_money and msn_money.debt_equity_ratio >= 0 else -1,
     'margin_of_safety_price' : margin_of_safety_price if margin_of_safety_price else 'null',
