@@ -31,6 +31,7 @@ def fetchDataForTickerSymbol(ticker):
         'debt_equity_ratio',
         'margin_of_safety_price',
         'current_price'
+        'ten_cap_price'
   """
   if not ticker:
     return None
@@ -56,7 +57,9 @@ def fetchDataForTickerSymbol(ticker):
   margin_of_safety_price, sticker_price = \
       _calculateMarginOfSafetyPrice(msn_money.equity_growth_rates[-1], msn_money.pe_low, msn_money.pe_high, msn_money.eps[-1], five_year_growth_rate)
   payback_time = _calculatePaybackTime(msn_money.equity_growth_rates[-1], msn_money.last_year_net_income, msn_money.market_cap, five_year_growth_rate)
-  computed_free_cash_flow = round(float(msn_money.free_cash_flow[-1]) * msn_money.shares_outstanding)
+  free_cash_flow_per_share = float(msn_money.free_cash_flow[-1])
+  computed_free_cash_flow = round(free_cash_flow_per_share * msn_money.shares_outstanding)
+  ten_cap_price = 10 * free_cash_flow_per_share
   template_values = {
     'ticker' : ticker,
     'name' : msn_money.name if msn_money and msn_money.name else 'null',
@@ -68,6 +71,7 @@ def fetchDataForTickerSymbol(ticker):
     'cash': msn_money.free_cash_flow_growth_rates if msn_money and msn_money.free_cash_flow_growth_rates else [],
     'total_debt' : msn_money.total_debt,
     'free_cash_flow' : computed_free_cash_flow,
+    'ten_cap_price' : round(ten_cap_price, 2),
     'debt_payoff_time' : round(float(msn_money.total_debt) / computed_free_cash_flow),
     'debt_equity_ratio' : msn_money.debt_equity_ratio if msn_money and msn_money.debt_equity_ratio >= 0 else -1,
     'margin_of_safety_price' : margin_of_safety_price if margin_of_safety_price else 'null',

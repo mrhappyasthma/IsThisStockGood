@@ -122,6 +122,22 @@ $(document).ready(function() {
         colorCellWithBackgroundColor('#' + key, Color.red());
       }
 
+      // Update 10 Cap section
+      let ten_cap_key = 'ten_cap_price';
+      let ten_cap_field_id = '#' + ten_cap_key;
+      let current_price = data['current_price'];
+      updateHtmlWithValueForKey(data, ten_cap_key, /*commas=*/true);
+      if (!data[ten_cap_key]) {
+        colorCellWithBackgroundColor(ten_cap_field_id, Color.red());
+      }
+      if (current_price > data[ten_cap_key]) {
+        colorCellWithBackgroundColor(ten_cap_field_id, Color.red());
+      }
+      else {
+        colorCellWithBackgroundColor(ten_cap_field_id, Color.green());
+      }
+
+
       // Update Market Cap numbers
       updateHtmlWithValueForKey(data, 'average_volume', /*commas=*/true);
       let averageVolume = data['average_volume'];

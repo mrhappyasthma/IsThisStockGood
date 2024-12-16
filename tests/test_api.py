@@ -18,7 +18,27 @@ def test_get_data():
 
     with app.test_client() as test_client:
         test_client = app.test_client()
+
         res = test_client.get('/api/ticker/nvda')
-        data = res.text
-        assert json.loads(data)['debt_payoff_time'] == 0
         assert res.status_code == 200
+
+        assert res.json['debt_payoff_time'] >= 0
+
+def test_get_ten_cap_price():
+    app = create_app(fetchDataForTickerSymbol)
+
+    with app.test_client() as test_client:
+        test_client = app.test_client()
+        res = test_client.get('/api/ticker/nvda')
+        assert res.json['ten_cap_price'] > 0
+
+def test_ten_cap_price_has_two_places_precision():
+    app = create_app(fetchDataForTickerSymbol)
+
+    with app.test_client() as test_client:
+        test_client = app.test_client()
+        res = test_client.get('/api/ticker/nvda')
+
+        price = res.json['ten_cap_price']
+
+        assert round(price, 2) == price

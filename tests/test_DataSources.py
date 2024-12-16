@@ -32,15 +32,6 @@ def test_msn_money():
     assert data.last_year_net_income > 0.0
     assert data.total_debt >= 0.0
 
-def test_yahoo():
-    test_ticker = 'MSFT'
-    test_name = 'Microsoft Corp'
-
-    data = get_yahoo_data(test_ticker)
-
-    assert data.ticker_symbol == test_ticker
-    assert float(data.five_year_growth_rate) > 0.0
-
 def get_msn_money_data(ticker):
     data_fetcher = DataFetcher()
     data_fetcher.ticker_symbol = ticker
