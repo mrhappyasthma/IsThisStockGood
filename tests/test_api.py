@@ -22,7 +22,10 @@ def test_get_data():
         res = test_client.get('/api/ticker/nvda')
         assert res.status_code == 200
 
-        assert res.json['debt_payoff_time'] >= 0
+        data = res.json
+        assert data['debt_payoff_time'] >= 0
+        assert data['sticker_price'] > 0.0
+        assert data['payback_time'] > 1
 
 def test_get_ten_cap_price():
     app = create_app(fetchDataForTickerSymbol)
