@@ -4,6 +4,7 @@ import isthisstockgood.RuleOneInvestingCalculations as RuleOne
 from requests_futures.sessions import FuturesSession
 from isthisstockgood.Active.MSNMoney import MSNMoney
 from isthisstockgood.Active.YahooFinance import YahooFinanceAnalysis
+from isthisstockgood.Active.Zacks import Zacks
 from threading import Lock
 
 logger = logging.getLogger("IsThisStockGood")
@@ -43,6 +44,7 @@ def fetchDataForTickerSymbol(ticker):
   # the json results.
   data_fetcher.fetch_msn_money_data()
   data_fetcher.fetch_yahoo_finance_analysis()
+  data_fetcher.fetch_zacks_analysis()
 
 
   # Wait for each RPC result before proceeding.
@@ -51,8 +53,12 @@ def fetchDataForTickerSymbol(ticker):
 
   msn_money = data_fetcher.msn_money
   yahoo_finance_analysis = data_fetcher.yahoo_finance_analysis
+  zacks_analysis = data_fetcher.zacks_analysis
   # NOTE: Some stocks won't have analyst growth rates, such as newly listed stocks or some foreign stocks.
-  five_year_growth_rate = yahoo_finance_analysis.five_year_growth_rate if yahoo_finance_analysis else 0
+  five_year_growth_rate = \
+      yahoo_finance_analysis.five_year_growth_rate if yahoo_finance_analysis \
+      else zacks_analysis.five_year_growth_rate if zacks_analysis \
+      else 0
   # TODO: Use TTM EPS instead of most recent year
   margin_of_safety_price, sticker_price = \
       _calculateMarginOfSafetyPrice(msn_money.equity_growth_rates[-1], msn_money.pe_low, msn_money.pe_high, msn_money.eps[-1], five_year_growth_rate)
@@ -126,6 +132,7 @@ class DataFetcher():
     self.ticker_symbol = ''
     self.msn_money = None
     self.yahoo_finance_analysis = None
+    self.zacks_analysis = None
     self.yahoo_finance_chart = None
     self.error = False
 
@@ -219,6 +226,29 @@ class DataFetcher():
     success = self.yahoo_finance_analysis.parse_analyst_five_year_growth_rate(result)
     if not success:
       self.yahoo_finance_analysis = None
+
+  def fetch_zacks_analysis(self):
+    session = self._create_session()
+    self.zacks_analysis = Zacks(self.ticker_symbol)
+
+    rpc = session.get(
+      self.zacks_analysis.url,
+      allow_redirects=True,
+      hooks={
+       'response': self.zacks_analysis.parse,
+      }
+    )
+    self.rpcs.append(rpc)
+
+  def parse_growth_rate_estimate(self, response, *args, **kwargs):
+    if response.status_code != 200:
+      return
+    if not self.zacks_analysis:
+      return
+    result = response.text
+    success = self.zacks_analysis.parse_analyst_five_year_growth_rate(result)
+    if not success:
+      self.zacks_analysis = None
 
   def fetch_yahoo_finance_chart(self):
     self.yahoo_finance_chart = YahooFinanceChart(self.ticker_symbol)
