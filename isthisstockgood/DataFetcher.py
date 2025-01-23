@@ -53,8 +53,12 @@ def fetchDataForTickerSymbol(ticker):
 
   msn_money = data_fetcher.msn_money
   yahoo_finance_analysis = data_fetcher.yahoo_finance_analysis
+  zacks_analysis = data_fetcher.zacks_analysis
   # NOTE: Some stocks won't have analyst growth rates, such as newly listed stocks or some foreign stocks.
-  five_year_growth_rate = yahoo_finance_analysis.five_year_growth_rate if yahoo_finance_analysis else 0
+  five_year_growth_rate = \
+      yahoo_finance_analysis.five_year_growth_rate if yahoo_finance_analysis \
+      else zacks_analysis.five_year_growth_rate if zacks_analysis \
+      else 0
   # TODO: Use TTM EPS instead of most recent year
   margin_of_safety_price, sticker_price = \
       _calculateMarginOfSafetyPrice(msn_money.equity_growth_rates[-1], msn_money.pe_low, msn_money.pe_high, msn_money.eps[-1], five_year_growth_rate)
