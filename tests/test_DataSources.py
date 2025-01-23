@@ -61,10 +61,10 @@ def get_growth_rate(ticker):
 
     # Make all network request asynchronously to build their portion of
     # the json results.
-    data_fetcher.fetch_growth_rate()
+    data_fetcher.fetch_zacks_analysis()
 
     # Wait for each RPC result before proceeding.
     for rpc in data_fetcher.rpcs:
       rpc.result()
 
-    return data_fetcher.future_growth_rate
+    return data_fetcher.zacks_analysis
