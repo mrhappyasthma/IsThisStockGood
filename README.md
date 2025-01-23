@@ -28,6 +28,18 @@ If you want to run bulk queries for stock analysis, check out the [Rule 1 Stock 
 
 This repository contains a script to iteratively issue a bulk fetch and populate a MySQL database with the results. It also includes some predefined SQL queries for convenience.
 
+## Install dependencies
+
+### Poetry
+
+On windows:
+
+1. Install `pipx` with `py -m pip install --user pipx`.
+2. Go to the path in "WARNING: The script pipx.exe is installed in `<USER folder>\AppData\Roaming\Python\Python3x\Scripts` which is not on "PATH". Once in this path execute: `.\pipx.exe ensurepath`
+3. Install poetry with: `pipx install poetry`
+4. In the repo path for IsThisStockGood, run `poetry install`
+5. Install the `export` command addon: `poetry self add poetry-plugin-export`
+
 ## Running the site locally.
 
 1. Clone the repo.
