@@ -1,4 +1,4 @@
-runtime: python38
+runtime: python312
 # Limit the number of instances to limit costs to keep it under the free quota.
 # More details available at: https://cloud.google.com/appengine/docs/managing-costs
 automatic_scaling:
