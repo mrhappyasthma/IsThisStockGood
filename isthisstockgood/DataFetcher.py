@@ -109,7 +109,6 @@ def _calculateMarginOfSafetyPrice(one_year_equity_growth_rate, pe_low, pe_high, 
   return margin_of_safety_price, sticker_price
 
 
-# TODO: Figure out how to get TTM net income instead of previous year net income.
 def _calculatePaybackTime(one_year_equity_growth_rate, last_year_net_income, market_cap, analyst_five_year_growth_rate):
   if not one_year_equity_growth_rate or not last_year_net_income or not market_cap or not analyst_five_year_growth_rate:
     return None
