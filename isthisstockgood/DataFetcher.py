@@ -59,12 +59,11 @@ def fetchDataForTickerSymbol(ticker):
       yahoo_finance_analysis.five_year_growth_rate if yahoo_finance_analysis \
       else zacks_analysis.five_year_growth_rate if zacks_analysis \
       else 0
-  # TODO: Use TTM EPS instead of most recent year
   margin_of_safety_price, sticker_price = _calculateMarginOfSafetyPrice(
           msn_money.equity_growth_rates[-1],
           msn_money.pe_low,
           msn_money.pe_high,
-          msn_money.quarterly_eps[-1],
+          sum(msn_money.quarterly_eps[-4:]),
           five_year_growth_rate
       )
   payback_time = _calculatePaybackTime(msn_money.equity_growth_rates[-1], msn_money.last_year_net_income, msn_money.market_cap, five_year_growth_rate)
