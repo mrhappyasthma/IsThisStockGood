@@ -60,8 +60,13 @@ def fetchDataForTickerSymbol(ticker):
       else zacks_analysis.five_year_growth_rate if zacks_analysis \
       else 0
   # TODO: Use TTM EPS instead of most recent year
-  margin_of_safety_price, sticker_price = \
-      _calculateMarginOfSafetyPrice(msn_money.equity_growth_rates[-1], msn_money.pe_low, msn_money.pe_high, msn_money.eps[-1], five_year_growth_rate)
+  margin_of_safety_price, sticker_price = _calculateMarginOfSafetyPrice(
+          msn_money.equity_growth_rates[-1],
+          msn_money.pe_low,
+          msn_money.pe_high,
+          msn_money.quarterly_eps[-1],
+          five_year_growth_rate
+      )
   payback_time = _calculatePaybackTime(msn_money.equity_growth_rates[-1], msn_money.last_year_net_income, msn_money.market_cap, five_year_growth_rate)
   free_cash_flow_per_share = float(msn_money.free_cash_flow[-1])
   computed_free_cash_flow = round(free_cash_flow_per_share * msn_money.shares_outstanding)
