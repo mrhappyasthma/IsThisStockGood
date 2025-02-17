@@ -108,6 +108,9 @@ class MSNMoney:
     
     # Debt
     self._parse_debt_to_equity(quarterly_data)
+
+    # Quarterly EPS for MOSP valuation
+    self.quarterly_eps = _extract_data_for_key(quarterly_data, "earningsPerShare")
     
     return True
 
