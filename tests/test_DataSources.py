@@ -42,8 +42,7 @@ def test_future_growth_rate():
     assert float(data.five_year_growth_rate) > 0.0
 
 def get_msn_money_data(ticker):
-    data_fetcher = DataFetcher()
-    data_fetcher.ticker_symbol = ticker
+    data_fetcher = DataFetcher(ticker)
 
     # Make all network request asynchronously to build their portion of
     # the json results.
@@ -56,8 +55,7 @@ def get_msn_money_data(ticker):
     return CompanyInfo(**vars(data_fetcher.msn_money))
 
 def get_growth_rate(ticker):
-    data_fetcher = DataFetcher()
-    data_fetcher.ticker_symbol = ticker
+    data_fetcher = DataFetcher(ticker)
 
     # Make all network request asynchronously to build their portion of
     # the json results.
