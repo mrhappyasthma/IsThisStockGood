@@ -113,8 +113,8 @@ class MSNMoney:
     # "EPS is calculated by dividing a company's net income
     # by the total number of outstanding shares."
     # - https://www.investopedia.com/terms/e/eps.asp
-    self.last_year_net_income = sum(self.quarterly_eps[-4:]) \
-        * self.shares_outstanding
+    ttm_eps = sum(self.quarterly_eps[-4:])
+    self.last_year_net_income =  ttm_eps * self.shares_outstanding
     
     return True
 
