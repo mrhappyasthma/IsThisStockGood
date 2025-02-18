@@ -22,6 +22,7 @@ class CompanyInfo:
     revenue: float
     revenue_growth_rates: [float]
     eps: float
+    quarterly_eps: [float]
     eps_growth_rates: [float]
     debt_equity_ratio: float
     last_year_net_income: float
