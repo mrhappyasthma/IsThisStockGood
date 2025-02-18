@@ -37,8 +37,7 @@ def fetchDataForTickerSymbol(ticker):
   if not ticker:
     return None
 
-  data_fetcher = DataFetcher()
-  data_fetcher.ticker_symbol = ticker
+  data_fetcher = DataFetcher(ticker)
 
   # Make all network request asynchronously to build their portion of
   # the json results.
@@ -129,10 +128,10 @@ class DataFetcher():
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
   ]
 
-  def __init__(self,):
+  def __init__(self, ticker):
     self.lock = Lock()
     self.rpcs = []
-    self.ticker_symbol = ''
+    self.ticker_symbol = ticker
     self.msn_money = None
     self.yahoo_finance_analysis = None
     self.zacks_analysis = None
