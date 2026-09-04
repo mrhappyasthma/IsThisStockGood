@@ -4,7 +4,7 @@ from isthisstockgood.DataFetcher import DataFetcher
 
 def test_msn_money():
     test_ticker = 'MSFT'
-    test_name = 'Microsoft Corp'
+    test_name = 'Microsoft Corporation'
 
     data = get_msn_money_data(test_ticker)
 

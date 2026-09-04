@@ -55,8 +55,14 @@ def fetchDataForTickerSymbol(ticker):
   zacks_analysis = data_fetcher.zacks_analysis
   # NOTE: Some stocks won't have analyst growth rates, such as newly listed stocks or some foreign stocks.
   five_year_growth_rate = \
-      yahoo_finance_analysis.five_year_growth_rate if yahoo_finance_analysis \
-      else zacks_analysis.five_year_growth_rate if zacks_analysis \
+      yahoo_finance_analysis.five_year_growth_rate if (
+          yahoo_finance_analysis
+          and yahoo_finance_analysis.five_year_growth_rate
+      ) \
+      else zacks_analysis.five_year_growth_rate if (
+          zacks_analysis
+          and zacks_analysis.five_year_growth_rate
+      ) \
       else 0
   margin_of_safety_price, sticker_price = _calculateMarginOfSafetyPrice(
           msn_money.equity_growth_rates[-1],

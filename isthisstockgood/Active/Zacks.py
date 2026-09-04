@@ -28,5 +28,13 @@ class Zacks:
           if "Next 5 Years" in line:
               result = lines[i+1]
 
+      if "NA" not in result:
+          estimate = re.sub(r"[^\d\.]", "", result)
+          return float(estimate)
+
+      for i, line in enumerate(lines):
+          if "Next Year (" in line:
+              result = lines[i+1]
+
       estimate = re.sub(r"[^\d\.]", "", result)
       return float(estimate)
