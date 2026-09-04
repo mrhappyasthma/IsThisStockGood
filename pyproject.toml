@@ -1,24 +1,40 @@
-[tool.poetry]
+[project]
 name = "IsThisStockGood"
 version = "0.1.0"
 description = ""
-authors = ["Mark Klara"]
+authors = [{ name = "Mark Klara" }]
+requires-python = ">=3.8,<4"
 readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "requests-futures>=1.0.1,<2",
+    "wheel>=0.43.0,<0.44",
+    "lxml>=5.2.2,<6",
+    "flask==3.0.3",
+    "virtualenv>=20.26.6,<21",
+]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-requests-futures = "^1.0.1"
-wheel = "^0.43.0"
-lxml = "^5.2.2"
-flask = "3.0.3"
-virtualenv = "^20.26.6"
+[dependency-groups]
+dev = ["pytest>=8.2.1,<9"]
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.2.1"
+[tool.uv]
+default-groups = "all"
+
+[tool.uv.build-backend]
+module-root = ""
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"
 
 [tool.pylint]
 indent-string="  "
